@@ -1,0 +1,156 @@
+
+group 'dk.bankdata.api'
+
+apply plugin: 'java'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+checkstyle {
+    toolVersion = '8.12'
+}
+
+test {
+    jacoco {
+        includes = ['*.*']
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
+    testCompile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
+    testCompile(group: 'junit', name: 'junit', version: project['junit.version'])
+}
+
+model {
+    tasks.generatePomFileForMavenJavaPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+    tasks.publishMavenJavaPublicationToMavenLocal {
+        dependsOn project.tasks.signArchives
+    }
+    tasks.publishMavenJavaPublicationToMavenRepository {
+        dependsOn project.tasks.signArchives
+    }
+}
+
+task sourceJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourceJar
+    archives javadocJar
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            customizePom(pom)
+            groupId 'dk.bankdata.api'
+            artifactId 'jaxrs-util'
+            version version
+
+            from components.java
+
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                artifact(pomAscFile) {
+                    classifier = null
+                    extension = 'pom.asc'
+                }
+            }
+
+            artifact(sourceJar) {
+                classifier = 'sources'
+            }
+            artifact(javadocJar) {
+                classifier = 'javadoc'
+            }
+
+            project.tasks.signArchives.signatureFiles.each {
+                artifact(it) {
+                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                    if (matcher.find()) {
+                        classifier = matcher.group(1)
+                    } else {
+                        classifier = null
+                    }
+                    extension = 'jar.asc'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username project.hasProperty('ossrhUsername') ? ossrhUsername : ''
+                password project.hasProperty('ossrhPassword') ? ossrhPassword : ''
+            }
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            name 'Jaxrs Security utility'
+            description 'Jaxrs Security utility for use in implementing financial APIs'
+            url 'https://github.com/Bankdata/jaxrs-security'
+            scm {
+                connection 'scm:git:https://github.com/Bankdata/jaxrs-security.git'
+                developerConnection 'scm:git:https://github.com/Bankdata/jaxrs-security.git'
+                url 'https://github.com/Bankdata/jaxrs-security.git'
+                tag 'HEAD'
+            }
+            licenses {
+                license {
+                    name 'The MIT License'
+                    url 'https://opensource.org/licenses/MIT'
+                }
+            }
+            developers {
+                developer {
+                    id 'bogedal'
+                    name 'Kenneth Bøgedal'
+                    email 'kbh@bankdata.dk'
+                    organization 'Bankdata'
+                    organizationUrl 'https://www.bankdata.dk'
+                }
+            }
+        }
+    }
+}
