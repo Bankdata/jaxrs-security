@@ -46,6 +46,8 @@ import net.minidev.json.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Follows the standard https://tools.ietf.org/html/rfc7519
+
 @Provider
 @ApplicationScoped
 @Priority(Priorities.AUTHENTICATION)
@@ -57,8 +59,7 @@ public class JwtFilter implements ContainerRequestFilter {
 
     @Inject JwtToken jwtToken;
     @Inject Client client;
-    @Inject
-    Environment environment;
+    @Inject Environment environment;
 
     private Cache<String, RSAKey> cache;
 
@@ -177,7 +178,7 @@ public class JwtFilter implements ContainerRequestFilter {
         if (now.after(exp)) {
             ProblemDetails.Builder builder = new ProblemDetails.Builder()
                     .title("Error validating jwt")
-                    .detail("Expired jwt {" + exp.getTimeInMillis() + " is after " + now.getTimeInMillis())
+                    .detail("Expired jwt - " + exp.getTimeInMillis() + " is after " + now.getTimeInMillis())
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
             throw new ValidationException(builder.build(), null);
@@ -186,7 +187,7 @@ public class JwtFilter implements ContainerRequestFilter {
         if (now.before(nbf)) {
             ProblemDetails.Builder builder = new ProblemDetails.Builder()
                     .title("Error validating jwt")
-                    .detail("Jwt not usable yet {" + nbf.getTimeInMillis() + " is before " + now.getTimeInMillis())
+                    .detail("Jwt not usable yet - " + nbf.getTimeInMillis() + " is before " + now.getTimeInMillis())
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
             throw new ValidationException(builder.build(), null);

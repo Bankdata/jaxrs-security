@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
+import dk.bankdata.api.jaxrs.environment.Environment;
+
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +15,6 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 
-import dk.bankdata.api.jaxrs.environment.Environment;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 @ApplicationScoped
