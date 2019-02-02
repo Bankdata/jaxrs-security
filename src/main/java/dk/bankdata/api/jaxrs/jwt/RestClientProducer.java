@@ -18,8 +18,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 @ApplicationScoped
 public class RestClientProducer {
-    @Inject
-    Environment envEnvironment;
+    @Inject Environment environment;
 
     private static final long CONNECTION_TIMEOUT = 10000;
     private static final long READ_TIMEOUT = 10000;
@@ -34,8 +33,8 @@ public class RestClientProducer {
                 .socketTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
                 .register(new JacksonJsonProvider(objectMapper));
 
-        if (!envEnvironment.getProxyUrl().isEmpty()) {
-            URI proxy = URI.create(envEnvironment.getProxyUrl());
+        if (!environment.getProxyUrl().isEmpty()) {
+            URI proxy = URI.create(environment.getProxyUrl());
             builder.defaultProxy(proxy.getHost(), proxy.getPort(), proxy.getScheme());
         }
 
