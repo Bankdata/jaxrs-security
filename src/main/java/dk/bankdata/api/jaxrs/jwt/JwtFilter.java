@@ -108,10 +108,7 @@ public class JwtFilter implements ContainerRequestFilter {
 
             JWTClaimsSet jwtClaimsSet = jwtObject.getJWTClaimsSet();
 
-            String sub = jwtClaimsSet.getSubject();
-            int bankNo = Integer.valueOf(sub.substring(3, 6));
-
-            jwtToken.setBankNo(bankNo);
+            jwtToken.setJWTClaimsSet(jwtClaimsSet);
             jwtToken.setJwt(jwt);
         } catch (Exception e) {
             LOG.error("Unable to authenticate user", e);

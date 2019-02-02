@@ -1,5 +1,7 @@
 package dk.bankdata.api.jaxrs.jwt;
 
+import com.nimbusds.jwt.JWTClaimsSet;
+
 import java.util.Objects;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Any;
@@ -7,21 +9,25 @@ import javax.enterprise.inject.Produces;
 
 @Any
 public class JwtToken {
-    private int bankNo = 0;
     private String jwt = "";
+    private JWTClaimsSet jwtClaimsSet;
 
     public JwtToken() {}
-
-    public int getBankNo() {
-        return bankNo;
-    }
 
     public String getJwt() {
         return jwt;
     }
 
-    public JwtToken setBankNo(int bankNo) {
-        this.bankNo = bankNo;
+    public JWTClaimsSet getJwtClaimsSet() {
+        return jwtClaimsSet;
+    }
+
+    public Object getValueFromClaims(String name) {
+        return jwtClaimsSet.getClaim(name);
+    }
+
+    public JwtToken setJWTClaimsSet(JWTClaimsSet jwtClaimsSet) {
+        this.jwtClaimsSet = jwtClaimsSet;
         return this;
     }
 
@@ -35,20 +41,20 @@ public class JwtToken {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JwtToken jwtToken = (JwtToken) o;
-        return bankNo == jwtToken.bankNo
-                && Objects.equals(jwt, jwtToken.jwt);
+        return Objects.equals(jwt, jwtToken.jwt) &&
+                Objects.equals(jwtClaimsSet, jwtToken.jwtClaimsSet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bankNo, jwt);
+        return Objects.hash(jwt, jwtClaimsSet);
     }
 
     @Override
     public String toString() {
         return "JwtToken{" +
-                "bankNo=" + bankNo +
-                ", jwt='" + jwt + '\'' +
+                "jwt='" + jwt + '\'' +
+                ", jwtClaimsSet=" + jwtClaimsSet +
                 '}';
     }
 
