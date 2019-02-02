@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.jwt;
 
 import java.util.Objects;
 import javax.enterprise.context.RequestScoped;

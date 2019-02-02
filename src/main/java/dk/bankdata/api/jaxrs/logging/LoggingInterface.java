@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.logging;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

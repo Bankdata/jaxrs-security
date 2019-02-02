@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.environment;
 
 import java.util.ArrayList;
 import java.util.Arrays;

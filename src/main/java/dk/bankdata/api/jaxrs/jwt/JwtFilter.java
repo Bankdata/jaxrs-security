@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.jwt;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -12,6 +12,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
+import dk.bankdata.api.jaxrs.environment.Environment;
 import dk.bankdata.api.types.ProblemDetails;
 
 import java.lang.annotation.ElementType;
@@ -56,7 +57,8 @@ public class JwtFilter implements ContainerRequestFilter {
 
     @Inject JwtToken jwtToken;
     @Inject Client client;
-    @Inject Environment environment;
+    @Inject
+    Environment environment;
 
     private Cache<String, RSAKey> cache;
 

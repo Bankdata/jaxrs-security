@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -13,11 +13,13 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 
+import dk.bankdata.api.jaxrs.environment.Environment;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 @ApplicationScoped
 public class RestClientProducer {
-    @Inject Environment envEnvironment;
+    @Inject
+    Environment envEnvironment;
 
     private static final long CONNECTION_TIMEOUT = 10000;
     private static final long READ_TIMEOUT = 10000;

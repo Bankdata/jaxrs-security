@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.cors;
 
 import java.net.URI;
 import javax.ws.rs.container.ContainerRequestContext;

@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.jwt;
 
 import dk.bankdata.api.types.ProblemDetails;
 

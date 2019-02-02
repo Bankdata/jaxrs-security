@@ -1,4 +1,4 @@
-package dk.bankdata.api.jaxrs;
+package dk.bankdata.api.jaxrs.environment;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
