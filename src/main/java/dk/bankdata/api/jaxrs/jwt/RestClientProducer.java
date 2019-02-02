@@ -35,7 +35,7 @@ public class RestClientProducer {
                 .register(new JacksonJsonProvider(objectMapper));
 
         if (!envEnvironment.getProxyUrl().isEmpty()) {
-            URI proxy = URI.create("http://httpproxy.bdpnet.dk:8080");
+            URI proxy = URI.create(envEnvironment.getProxyUrl());
             builder.defaultProxy(proxy.getHost(), proxy.getPort(), proxy.getScheme());
         }
 
