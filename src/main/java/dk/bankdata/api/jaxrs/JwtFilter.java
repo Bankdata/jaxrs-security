@@ -1,7 +1,5 @@
 package dk.bankdata.api.jaxrs;
 
-import static producers.RestClientProducer.WithProxy;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -15,13 +13,15 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import dk.bankdata.api.types.ProblemDetails;
-import domain.AdvisorException;
-import domain.Environment;
-import domain.JwtToken;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.annotation.Priority;
 import javax.cache.Cache;
@@ -39,14 +39,11 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 @ApplicationScoped
@@ -58,7 +55,7 @@ public class JwtFilter implements ContainerRequestFilter {
     @Context ResourceInfo resourceInfo;
 
     @Inject JwtToken jwtToken;
-    @Inject @RestClientProducer.WithProxy Client client;
+    @Inject Client client;
     @Inject Environment environment;
 
     private Cache<String, RSAKey> cache;
@@ -78,7 +75,7 @@ public class JwtFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) {
         Method resourceMethod = resourceInfo.getResourceMethod();
 
-        if (!resourceMethod.isAnnotationPresent(ValidJwt.class)) return;
+        if (resourceMethod.isAnnotationPresent(OpenApi.class)) return;
 
         String authorizationHeader = requestContext.getHeaderString("Authorization");
 
@@ -117,10 +114,8 @@ public class JwtFilter implements ContainerRequestFilter {
             LOG.error("Unable to authenticate user", e);
             ProblemDetails problemDetails;
 
-
-
-            if (e instanceof AdvisorException) {
-                problemDetails = ((AdvisorException) e).getProblemDetails();
+            if (e instanceof ValidationException) {
+                problemDetails = ((ValidationException) e).getProblemDetails();
             } else {
                 problemDetails = new ProblemDetails.Builder()
                         .title("Unable to authenticate user")
@@ -153,18 +148,18 @@ public class JwtFilter implements ContainerRequestFilter {
                     .detail("Invalid audience(s) - " + aud)
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
 
         String issuer = jwtClaimsSet.getIssuer();
 
-        if (!environment.getCurityUrls().contains(issuer.toLowerCase())) {
+        if (!environment.getOAuthUrls().contains(issuer.toLowerCase())) {
             ProblemDetails.Builder builder = new ProblemDetails.Builder()
                     .title("Error validating issuer")
                     .detail("Invalid issuer - " + issuer)
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
 
         Calendar exp = Calendar.getInstance();
@@ -183,7 +178,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .detail("Expired jwt {" + exp.getTimeInMillis() + " is after " + now.getTimeInMillis())
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
 
         if (now.before(nbf)) {
@@ -192,7 +187,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .detail("Jwt not usable yet {" + nbf.getTimeInMillis() + " is before " + now.getTimeInMillis())
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
     }
 
@@ -232,7 +227,7 @@ public class JwtFilter implements ContainerRequestFilter {
                         .detail(e.getMessage())
                         .status(response.getStatus());
 
-                throw new AdvisorException(builder.build(), e);
+                throw new ValidationException(builder.build(), e);
             }
         }
 
@@ -241,7 +236,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .title("Unable to locate key with id " + kid)
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
 
         JWSVerifier verifier = new RSASSAVerifier(rsaKey.toRSAPublicKey());
@@ -251,7 +246,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .title("Unable to verify jwt signature")
                     .status(Response.Status.UNAUTHORIZED.getStatusCode());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
     }
 
@@ -268,7 +263,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .detail(e.getMessage())
                     .status(response.getStatus());
 
-            throw new AdvisorException(builder.build(), e);
+            throw new ValidationException(builder.build(), e);
         }
     }
 
@@ -276,10 +271,10 @@ public class JwtFilter implements ContainerRequestFilter {
         if (!response.getStatusInfo().equals(Response.Status.OK)) {
             ProblemDetails.Builder builder = new ProblemDetails.Builder()
                     .type(response.getLocation())
-                    .title("Error while validating response from curity")
+                    .title("Error while validating response from oauth server")
                     .status(response.getStatus());
 
-            throw new AdvisorException(builder.build(), null);
+            throw new ValidationException(builder.build(), null);
         }
     }
 
@@ -302,7 +297,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .detail(sb.toString())
                     .status(response == null ? 500 : response.getStatus());
 
-            throw new AdvisorException(builder.build(), e);
+            throw new ValidationException(builder.build(), e);
         }
 
         validateResponse(response);
@@ -312,5 +307,5 @@ public class JwtFilter implements ContainerRequestFilter {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface ValidJwt {}
+    public @interface OpenApi {}
 }

@@ -1,22 +1,21 @@
 package dk.bankdata.api.jaxrs;
 
-import javax.enterprise.inject.Any;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.enterprise.inject.Any;
+
 @Any
 public class Environment {
-    private String apigeeUrl = "";
-    private String apigeeKey = "";
-    private List<String> curityUrls = new ArrayList<>();
+    private List<String> authUrls = new ArrayList<>();
+    private String proxyUrl = "";
 
     private Environment() {}
 
-    public Environment(String apigeeUrl, String apigeeKey, String curityUrls) {
-        this.apigeeUrl = apigeeUrl;
-        this.apigeeKey = apigeeKey;
-        this.curityUrls = createCurityUrlsFromString(curityUrls);
+    public Environment(String authUrls, String proxyUrl) {
+        this.authUrls = createCurityUrlsFromString(authUrls);
+        this.proxyUrl = proxyUrl;
     }
 
     private List<String> createCurityUrlsFromString(String curityUrls) {
@@ -24,15 +23,11 @@ public class Environment {
         return Arrays.asList(curityArray);
     }
 
-    public String getApigeeUrl() {
-        return apigeeUrl;
+    public List<String> getOAuthUrls() {
+        return authUrls;
     }
 
-    public String getApigeeKey() {
-        return apigeeKey;
-    }
-
-    public List<String> getCurityUrls() {
-        return curityUrls;
+    public String getProxyUrl() {
+        return proxyUrl;
     }
 }

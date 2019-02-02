@@ -1,9 +1,9 @@
 package dk.bankdata.api.jaxrs;
 
+import java.util.Objects;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
-import java.util.Objects;
 
 @Any
 public class JwtToken {

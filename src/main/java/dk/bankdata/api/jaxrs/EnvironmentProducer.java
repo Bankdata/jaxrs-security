@@ -8,11 +8,10 @@ public class EnvironmentProducer {
 
     @Produces
     public Environment create() {
-        String apigeeUrl = loadSystemEnvironmentVariable("INTERNAL_APIGEE_URL");
-        String apigeeApiKey = loadSystemEnvironmentVariable("API_KEY");
-        String curityIssuerUrls = loadSystemEnvironmentVariable("CURITY_ISSUER_URLS");
+        String curityIssuerUrls = loadSystemEnvironmentVariable("SECURITY_ISSUER_URLS");
+        String proxyUrl = loadSystemEnvironmentVariable("PROXY_URL");
 
-        return new Environment(apigeeUrl, apigeeApiKey, curityIssuerUrls);
+        return new Environment(curityIssuerUrls, proxyUrl);
     }
 
     private String loadSystemEnvironmentVariable(String variableName) {
