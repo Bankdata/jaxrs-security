@@ -50,9 +50,9 @@ public class Encryption {
     private Cipher createCipher(int encryptMode) {
         try {
             String cipherKey = environment.getCipherKey();
-            SecretKeySpec secretKeySpec = new SecretKeySpec(cipherKey.getBytes(), "AES");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(cipherKey.getBytes("UTF-8"), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(encryptMode, secretKeySpec);
 
             return cipher;

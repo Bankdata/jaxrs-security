@@ -1,18 +1,18 @@
 package dk.bankdata.api.jaxrs.cors;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CorsFilterTest {
@@ -33,7 +33,8 @@ public class CorsFilterTest {
         MultivaluedMap<String, Object> result = responseContext.getHeaders();
 
         Assert.assertEquals("[GET, POST, PUT, DELETE, PATCH, OPTIONS]", result.get("Access-Control-Allow-Methods").toString());
-        Assert.assertEquals("[Location,Content-Type,Accept,X-FAPI-Interaction-ID,Origin,Authorization]", result.get("Access-Control-Allow-Headers").toString());
+        Assert.assertEquals("[Location,Content-Type,Accept,X-FAPI-Interaction-ID,Origin,Authorization]",
+                result.get("Access-Control-Allow-Headers").toString());
         Assert.assertEquals("[some-origin]", result.get("Access-Control-Allow-Origin").toString());
         Assert.assertEquals("[1728000]", result.get("Access-Control-Max-Age").toString());
         Assert.assertEquals("[Origin]", result.get("Vary").toString());
