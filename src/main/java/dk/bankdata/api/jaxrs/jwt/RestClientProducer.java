@@ -6,6 +6,8 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import dk.bankdata.api.jaxrs.environment.Environment;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
@@ -13,9 +15,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.inject.Qualifier;
 import javax.ws.rs.client.Client;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @ApplicationScoped
 public class RestClientProducer {
@@ -26,18 +32,28 @@ public class RestClientProducer {
 
     @Produces
     @RequestScoped
+    @WithProxy
     public Client produceClient() {
         ObjectMapper objectMapper = createObjectMapper();
+        URI proxy = URI.create(environment.getProxyUrl());
+        ResteasyClientBuilder builder = new ResteasyClientBuilder()
+                .establishConnectionTimeout(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
+                .socketTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
+                .register(new JacksonJsonProvider(objectMapper))
+                .defaultProxy(proxy.getHost(), proxy.getPort(), proxy.getScheme());
 
+        return builder.build();
+    }
+
+    @Produces
+    @RequestScoped
+    @WithoutProxy
+    public Client createNoneProxyClient() {
+        ObjectMapper objectMapper = createObjectMapper();
         ResteasyClientBuilder builder = new ResteasyClientBuilder()
                 .establishConnectionTimeout(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
                 .socketTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
                 .register(new JacksonJsonProvider(objectMapper));
-
-        if (!environment.getProxyUrl().isEmpty()) {
-            URI proxy = URI.create(environment.getProxyUrl());
-            builder.defaultProxy(proxy.getHost(), proxy.getPort(), proxy.getScheme());
-        }
 
         return builder.build();
     }
@@ -47,4 +63,15 @@ public class RestClientProducer {
         objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
         return objectMapper;
     }
+
+    @Qualifier
+    @Retention(RUNTIME)
+    @Target({TYPE, METHOD, FIELD, PARAMETER})
+    public @interface WithProxy {}
+
+    @Qualifier
+    @Retention(RUNTIME)
+    @Target({TYPE, METHOD, FIELD, PARAMETER})
+    public @interface WithoutProxy {}
+
 }
