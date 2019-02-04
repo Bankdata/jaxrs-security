@@ -6,9 +6,11 @@ import dk.bankdata.api.types.ProblemDetails;
 import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+@ApplicationScoped
 public class Encryption {
     @Inject Environment environment;
 
