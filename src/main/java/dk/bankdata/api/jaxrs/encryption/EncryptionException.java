@@ -1,13 +1,13 @@
-package dk.bankdata.api.jaxrs.jwt;
+package dk.bankdata.api.jaxrs.encryption;
 
 import dk.bankdata.api.types.ProblemDetails;
 
 import java.util.Objects;
 
-public class ValidationException extends RuntimeException {
+public class EncryptionException extends RuntimeException {
     private ProblemDetails problemDetails;
 
-    public ValidationException(ProblemDetails problemDetails, Exception cause) {
+    public EncryptionException(ProblemDetails problemDetails, Exception cause) {
         this.problemDetails = problemDetails;
         this.initCause(cause);
     }
@@ -20,7 +20,7 @@ public class ValidationException extends RuntimeException {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValidationException that = (ValidationException) o;
+        EncryptionException that = (EncryptionException) o;
         return Objects.equals(problemDetails, that.problemDetails);
     }
 
@@ -31,8 +31,9 @@ public class ValidationException extends RuntimeException {
 
     @Override
     public String toString() {
-        return "ValidationException{" +
+        return "EncryptionException{" +
                 "problemDetails=" + problemDetails +
                 '}';
     }
+
 }

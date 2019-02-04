@@ -10,8 +10,9 @@ public class EnvironmentProducer {
     public Environment create() {
         String curityIssuerUrls = loadSystemEnvironmentVariable("SECURITY_ISSUER_URLS");
         String proxyUrl = loadSystemEnvironmentVariable("PROXY_URL");
+        String cipherKey = loadSystemEnvironmentVariable("CIPHER_KEY");
 
-        return new Environment(curityIssuerUrls, proxyUrl);
+        return new Environment(curityIssuerUrls, proxyUrl, cipherKey);
     }
 
     private String loadSystemEnvironmentVariable(String variableName) {

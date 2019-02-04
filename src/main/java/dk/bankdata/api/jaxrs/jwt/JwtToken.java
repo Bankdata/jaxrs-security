@@ -26,7 +26,7 @@ public class JwtToken {
         return jwtClaimsSet.getClaim(name);
     }
 
-    public JwtToken setJWTClaimsSet(JWTClaimsSet jwtClaimsSet) {
+    public JwtToken setJwtClaimsSet(JWTClaimsSet jwtClaimsSet) {
         this.jwtClaimsSet = jwtClaimsSet;
         return this;
     }
@@ -41,8 +41,8 @@ public class JwtToken {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JwtToken jwtToken = (JwtToken) o;
-        return Objects.equals(jwt, jwtToken.jwt) &&
-                Objects.equals(jwtClaimsSet, jwtToken.jwtClaimsSet);
+        return Objects.equals(jwt, jwtToken.jwt)
+                && Objects.equals(jwtClaimsSet, jwtToken.jwtClaimsSet);
     }
 
     @Override
