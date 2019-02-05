@@ -153,7 +153,7 @@ public class JwtFilter implements ContainerRequestFilter {
 
         String issuer = jwtClaimsSet.getIssuer();
 
-        if (!environment.getOAuthUrls().contains(issuer.toLowerCase())) {
+        if (!environment.getIssuers().contains(issuer.toLowerCase())) {
             ProblemDetails.Builder builder = new ProblemDetails.Builder()
                     .title("Error validating issuer")
                     .detail("Invalid issuer - " + issuer)

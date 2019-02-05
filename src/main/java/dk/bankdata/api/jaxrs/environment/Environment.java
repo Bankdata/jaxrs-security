@@ -8,25 +8,25 @@ import javax.enterprise.inject.Any;
 
 @Any
 public class Environment {
-    private List<String> authUrls = new ArrayList<>();
+    private List<String> issuers = new ArrayList<>();
     private String proxyUrl = "";
     private String cipherKey = "";
 
     private Environment() {}
 
-    public Environment(String authUrls, String proxyUrl, String cipherKey) {
-        this.authUrls = createCurityUrlsFromString(authUrls);
+    public Environment(String issuers, String proxyUrl, String cipherKey) {
+        this.issuers = createIssuersFromString(issuers);
         this.proxyUrl = proxyUrl;
         this.cipherKey = cipherKey;
     }
 
-    private List<String> createCurityUrlsFromString(String curityUrls) {
-        String[] curityArray = curityUrls.split(",");
-        return Arrays.asList(curityArray);
+    private List<String> createIssuersFromString(String issuerUrls) {
+        String[] issuers = issuerUrls.split(",");
+        return Arrays.asList(issuers);
     }
 
-    public List<String> getOAuthUrls() {
-        return authUrls;
+    public List<String> getIssuers() {
+        return issuers;
     }
 
     public String getProxyUrl() {
