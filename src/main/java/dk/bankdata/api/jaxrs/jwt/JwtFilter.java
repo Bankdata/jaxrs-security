@@ -134,7 +134,7 @@ public class JwtFilter implements ContainerRequestFilter {
         }
     }
 
-    private void verifyJwt(JWT jwtObject) throws ParseException {
+    void verifyJwt(JWT jwtObject) throws ParseException {
         String approvedAudience = "relationsbank";
 
         JWTClaimsSet jwtClaimsSet = jwtObject.getJWTClaimsSet();
@@ -191,7 +191,7 @@ public class JwtFilter implements ContainerRequestFilter {
         }
     }
 
-    private void verifySignature(String jwt) throws JOSEException, ParseException {
+    void verifySignature(String jwt) throws JOSEException, ParseException {
         SignedJWT signedJwt = SignedJWT.parse(jwt);
         String kid = signedJwt.getHeader().getKeyID();
         String issuer = signedJwt.getJWTClaimsSet().getIssuer();
