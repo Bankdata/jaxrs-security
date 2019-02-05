@@ -1,18 +1,61 @@
 package dk.bankdata.api.jaxrs.encryption;
 
-import dk.bankdata.api.jaxrs.environment.Environment;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import dk.bankdata.api.types.ProblemDetails;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.Base64;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Qualifier;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+
+/*
+To @Inject this class you'll have to use this method:
+@Inject
+@CipherKey(value = "some-cipher-key")
+Encryption encryption;
+ */
 
 @ApplicationScoped
 public class Encryption {
-    @Inject Environment environment;
+    private String cipherKey;
+
+    public Encryption() {}
+
+    public Encryption(String cipherKey) {
+        this.cipherKey = cipherKey;
+    }
+
+    private String initCipherKey(InjectionPoint injectionPoint) {
+        for (Annotation annotation : injectionPoint.getQualifiers()) {
+            if (annotation.annotationType().equals(CipherKey.class)) {
+                return ((CipherKey) annotation).value();
+            }
+        }
+
+        throw new IllegalStateException("No @CipherKey on InjectionPoint");
+    }
+
+    @Produces
+    @CipherKey
+    public Encryption createEncryption(InjectionPoint injectionPoint) {
+        String cipherKey = initCipherKey(injectionPoint);
+        return new Encryption(cipherKey);
+    }
 
     public String encrypt(String toBeEncrypted) {
         try {
@@ -49,7 +92,6 @@ public class Encryption {
 
     private Cipher createCipher(int encryptMode) {
         try {
-            String cipherKey = environment.getCipherKey();
             SecretKeySpec secretKeySpec = new SecretKeySpec(cipherKey.getBytes("UTF-8"), "AES");
 
             Cipher cipher = Cipher.getInstance("AES");
@@ -64,5 +106,14 @@ public class Encryption {
 
             throw new EncryptionException(builder.build(), e);
         }
+    }
+
+    @Qualifier
+    @Target({ TYPE, METHOD, PARAMETER, FIELD })
+    @Retention(RUNTIME)
+    @Documented
+    public @interface CipherKey {
+        @Nonbinding
+        String value() default "";
     }
 }
