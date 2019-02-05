@@ -52,7 +52,7 @@ public class Encryption {
             String cipherKey = environment.getCipherKey();
             SecretKeySpec secretKeySpec = new SecretKeySpec(cipherKey.getBytes("UTF-8"), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            Cipher cipher = Cipher.getInstance("AES");
             cipher.init(encryptMode, secretKeySpec);
 
             return cipher;
