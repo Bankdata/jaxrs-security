@@ -8,11 +8,11 @@ public class EnvironmentProducer {
 
     @Produces
     public Environment create() {
-        String curityIssuerUrls = loadSystemEnvironmentVariable("SECURITY_ISSUER_URLS");
+        String issuers = loadSystemEnvironmentVariable("SECURITY_ISSUERS");
         String proxyUrl = loadSystemEnvironmentVariable("PROXY_URL");
         String cipherKey = loadSystemEnvironmentVariable("CIPHER_KEY");
 
-        return new Environment(curityIssuerUrls, proxyUrl, cipherKey);
+        return new Environment(issuers, proxyUrl, cipherKey);
     }
 
     private String loadSystemEnvironmentVariable(String variableName) {
