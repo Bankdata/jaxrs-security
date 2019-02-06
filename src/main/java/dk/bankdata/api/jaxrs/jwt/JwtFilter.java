@@ -12,7 +12,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
-import dk.bankdata.api.jaxrs.environment.Environment;
 import dk.bankdata.api.types.ProblemDetails;
 
 import java.lang.annotation.ElementType;
@@ -51,6 +50,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 @ApplicationScoped
 @Priority(Priorities.AUTHENTICATION)
+@SuppressWarnings("checkstyle:commentsindentation")
 public class JwtFilter implements ContainerRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(JwtFilter.class);
     private static final String CACHE_NAME = "jwks";
@@ -59,7 +59,6 @@ public class JwtFilter implements ContainerRequestFilter {
 
     @Inject JwtToken jwtToken;
     @Inject Client client;
-    @Inject Environment environment;
 
     private Cache<String, RSAKey> cache;
 
@@ -135,7 +134,7 @@ public class JwtFilter implements ContainerRequestFilter {
     }
 
     void verifyJwt(JWT jwtObject) throws ParseException {
-        String approvedAudience = "relationsbank";
+        String approvedAudience = ""; //TODO How to set this value?
 
         JWTClaimsSet jwtClaimsSet = jwtObject.getJWTClaimsSet();
         ArrayList<String> audiences = new ArrayList<>(jwtClaimsSet.getAudience());
@@ -153,14 +152,15 @@ public class JwtFilter implements ContainerRequestFilter {
 
         String issuer = jwtClaimsSet.getIssuer();
 
-        if (!environment.getIssuers().contains(issuer.toLowerCase())) {
-            ProblemDetails.Builder builder = new ProblemDetails.Builder()
-                    .title("Error validating issuer")
-                    .detail("Invalid issuer - " + issuer)
-                    .status(Response.Status.UNAUTHORIZED.getStatusCode());
-
-            throw new ValidationException(builder.build(), null);
-        }
+        //TODO How to set this value?
+//        if (!environment.getIssuers().contains(issuer.toLowerCase())) {
+//            ProblemDetails.Builder builder = new ProblemDetails.Builder()
+//                    .title("Error validating issuer")
+//                    .detail("Invalid issuer - " + issuer)
+//                    .status(Response.Status.UNAUTHORIZED.getStatusCode());
+//
+//            throw new ValidationException(builder.build(), null);
+//        }
 
         Calendar exp = Calendar.getInstance();
         exp.setTime(jwtClaimsSet.getExpirationTime());
