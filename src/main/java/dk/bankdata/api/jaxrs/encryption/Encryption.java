@@ -7,9 +7,27 @@ import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class Encryption {
-    private String cipherKey;
+    /**
+     * Encryption is to be used to obfuscate sensitive data.
+     *
+     * <p>
+     *     The cipher key has to be 128 bit or 32 characters
+     *
+     *     Encrypted data will be returned as Base64 encoded
+     *     Decrypted data is returned as a String
+     * </p>
+     *
+     * <code>
+     *      Encryption enc = new Encryption("some-secret-key");
+     *      String encrypted = enc.encrypt("sensitive-data");
+     * </code>
+     * <code>
+     *      Encryption enc = new Encryption("some-secret-key");
+     *      String decrypted = enc.decrypt(encrypted);
+     * </code>
+     */
 
-    public Encryption() {}
+    private String cipherKey;
 
     public Encryption(String cipherKey) {
         this.cipherKey = cipherKey;

@@ -1,19 +1,26 @@
 package dk.bankdata.api.jaxrs.encryption;
 
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class EncryptionTest {
-    @InjectMocks Encryption encryption;
-
     @Test
     public void shouldEncryptString() {
+        String seed = "Secret-Text";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String encrypted = encryption.encrypt(seed);
+
+        Assert.assertEquals("Sxzgi2b+T92FTmr5UNw2nA==", encrypted);
     }
 
     @Test
     public void shouldDecryptString() {
+        String seed = "Sxzgi2b+T92FTmr5UNw2nA==";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String decrypted = encryption.decrypt(seed);
+
+        Assert.assertEquals("Secret-Text", decrypted);
     }
 }
