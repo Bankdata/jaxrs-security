@@ -17,27 +17,31 @@ public class CorsFilter implements ContainerResponseFilter {
      *  2> provide a custom configuration via the constructor
      * </p>
      *
-     * @Param corsConfiguration custom configuration if defaults needs to be changed.
+     * @Param corsConfiguration - custom configuration if defaults needs to be changed.
      *
+     * <p>
      * To be able to configure the filter with a custom filter you will have to make a class that
-     * extends {@Link javax.ws.rs.core.Application} and override {@code null Set<Object> getSingletons()}
+     * extends javax.ws.rs.core.Application and override Set&lt;Object&gt; getSingletons()
+     * </p>
      *
      * <code>
-     *      @javax.ws.rs.ApplicationPath("/")
-     *      public class RestApplication extends javax.ws.rs.core.Application {
-     *          CorsConfiguration CorsConfiguration = new CorsConfiguration()
-     *              .allowMethods(...)
-     *              .allowHeaders(...)
-     *              .maxAge(...);
-     *          CorsFilter corsFilter = new CorsFilter(corsConfiguration);
+     * &#xA9;javax.ws.rs.ApplicationPath("/")
+     * public class RestApplication extends javax.ws.rs.core.Application {
+     *      CorsConfiguration CorsConfiguration = new CorsConfiguration()
+     *      .allowMethods(...)
+     *      .allowHeaders(...)
+     *      .maxAge(...);
      *
-     *          @Override
-     *          public Set<Class<?>> getSingletons() {
-     *              Set<Object> singletons = new HashSet<>(super.getSingletons);
-     *              singletons.add(corsFilter);
+     *      CorsFilter corsFilter = new CorsFilter(corsConfiguration);
      *
-     *              return singletons;
-     *          }
+     *      &#xA9;Override
+     *      public Set&lt;Class&lt;?&gt;&gt; getSingletons() {
+     *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
+     *          singletons.add(corsFilter);
+     *
+     *          return singletons;
+     *      }
+     * }
      * </code>
      **/
 
