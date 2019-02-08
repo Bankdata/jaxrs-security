@@ -1,5 +1,7 @@
 package dk.bankdata.api.jaxrs.logging;
 
+import static dk.bankdata.api.jaxrs.logging.Logging.LogEnabled;
+
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
@@ -10,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -23,17 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-
 /**
- * Filer to log input/output as well as key data from endpoint invocations.
+ * TODO: Populate me later - Bedtime now.
  */
-@LoggingInterface.Logging
+@LogEnabled
 @Provider
-@ApplicationScoped
 @Priority(Priorities.USER - 99)
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
-    private static final String KEY_REQUEST_ID = "requestId";
+    private static final String KEY_SUBJECT = "subject";
     private static final String KEY_EXECUTION_TIME = "Execution-Time";
     private static final String KEY_HTTP_STATUS = "http-status";
 
@@ -62,7 +61,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
                 String jwtSubject = jwtClaimsSet.getSubject();
 
-                MDC.put(KEY_REQUEST_ID, jwtSubject);
+                MDC.put(KEY_SUBJECT, jwtSubject);
 
             } catch (ParseException e) {
                 LOG.error("LoggingFilter failed with message {} ", e.getMessage());
@@ -83,10 +82,10 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         String method = requestContext.getMethod();
         String path = requestContext.getUriInfo().getPath();
 
-        LOG.info("method={}, path={}, request={}, status={}, time={} ms, response={}",
+        LOG.debug("method={}, path={}, request={}, status={}, time={} ms, response={}",
                 method, path, requestEntity, httpStatus, executionTime, responseEntity);
 
-        MDC.remove(KEY_REQUEST_ID);
+        MDC.remove(KEY_SUBJECT);
         MDC.remove(KEY_EXECUTION_TIME);
         MDC.remove(KEY_HTTP_STATUS);
     }

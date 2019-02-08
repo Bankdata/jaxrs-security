@@ -1,0 +1,14 @@
+package dk.bankdata.api.jaxrs.logging;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.ws.rs.NameBinding;
+
+public class Logging {
+    @NameBinding
+    @Retention(value = RetentionPolicy.RUNTIME)
+    @Target({ElementType.TYPE, ElementType.METHOD})
+    public @interface LogEnabled {}
+}
