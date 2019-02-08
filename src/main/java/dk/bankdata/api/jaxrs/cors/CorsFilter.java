@@ -18,13 +18,36 @@ public class CorsFilter implements ContainerResponseFilter {
      * </p>
      *
      * @Param corsConfiguration custom configuration if defaults needs to be changed.
+     *
+     * To be able to configure the filter with a custom filter you will have to make a class that
+     * extends {@Link javax.ws.rs.core.Application} and override {@code null Set<Object> getSingletons()}
+     *
+     * <code>
+     *      @javax.ws.rs.ApplicationPath("/")
+     *      public class RestApplication extends javax.ws.rs.core.Application {
+     *          CorsConfiguration CorsConfiguration = new CorsConfiguration()
+     *              .allowMethods(...)
+     *              .allowHeaders(...)
+     *              .maxAge(...);
+     *          CorsFilter corsFilter = new CorsFilter(corsConfiguration);
+     *
+     *          @Override
+     *          public Set<Class<?>> getSingletons() {
+     *              Set<Object> singletons = new HashSet<>(super.getSingletons);
+     *              singletons.add(corsFilter);
+     *
+     *              return singletons;
+     *          }
+     * </code>
      **/
 
     private CorsConfiguration corsConfiguration;
 
-    public CorsFilter() {}
+    public CorsFilter() {
+        this.corsConfiguration = new CorsConfiguration();
+    }
 
-    public CorsFilter(CorsConfiguration corsConfiguration){
+    public CorsFilter(CorsConfiguration corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
     }
 
