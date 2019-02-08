@@ -10,8 +10,15 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class CorsFilter implements ContainerResponseFilter {
     /**
-     * Filter responsible for setting up reasonable Cross-Origin Resource Sharing (CORS) filter.
-     */
+     * Sets up a Filter responsible for reasonable Cross-Origin Resource Sharing (CORS).
+     * <p>
+     * There are two ways to configure this filter.
+     *  1> Use the default configuration or
+     *  2> provide a custom configuration via the constructor
+     * </p>
+     *
+     * @Param corsConfiguration custom configuration if defaults needs to be changed.
+     **/
 
     private CorsConfiguration corsConfiguration;
 
