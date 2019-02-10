@@ -31,14 +31,11 @@ dependencies {
     compile(group: "javax", name: "javaee-api", version: project['javax.version'])
     compile(group: 'org.jboss.resteasy', name: 'resteasy-client', version: project['org.jboss.resteasy.version'])
     compile(group: 'org.slf4j', name: 'slf4j-log4j12', version: project['org.slf4j.version'])
-    compile(group: "com.nimbusds", name: "nimbus-jose-jwt", version: project['com.nimbusds.version'])
+    compile(group: 'org.bitbucket.b_c', name: 'jose4j', version: project['org.bitbucket.b_c.version'])
     compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
     compile(group: "com.fasterxml.jackson.jaxrs", name: "jackson-jaxrs-json-provider", version: project['com.fasterxml.jackson.version'])
-    compile(group: 'javax.cache', name: 'cache-api', version: project['javax.cache.version'])
     compile(group: 'dk.bankdata.api', name:'types', version: project['dk.bankdata.api.version'])
-
-    runtime (group: 'org.cache2k', name: 'cache2k-all', version: project['org.cache2k.version'])
-    runtime (group: 'org.cache2k', name: 'cache2k-jcache', version: project['org.cache2k.version'])
+    compile(group: 'org.json', name: 'json', version: project['org.json.version'])
 
     testCompile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
     testCompile(group: 'junit', name: 'junit', version: project['junit.version'])

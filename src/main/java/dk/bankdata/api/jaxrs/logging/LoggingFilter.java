@@ -22,40 +22,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-/**
- * Log request and response statuscode, entity and process timer.
- *
- * <p>
- *     Each endpoint that is annotated with LogEnabled will have its input and output logged.
- *     Request entity (if present) along with response entity (if present) and the process time
- *     will be added to the log.
- *
- *     The request and response entity has a max length of 197 characters followed by ... to limit
- *     log size.
- *
- *     If a JWT is present in the header of the request, then to subject of the JWT will be logged
- *     to help track user interaction.
- *
- *     The log is limited to logging only if LOG.isDebugEnabled() is true
- *
- *     Example of an endpoint using the annotation.
- * </p>
- *
- * <code>
- *     GET
- *     Path("/data)
- *     &#xA9;LogEnabled
- *     &#xA9;Consumes(MediaType.APPLICATION_JSON)
- *     &#xA9;Produces(MediaType.APPLICATION_JSON)
- *     public Response getData() {
- *        ...
- *     }
- * </code>
- */
 @LogEnabled
 @Provider
 @Priority(Priorities.USER - 99)
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
+    /**
+     * Log request and response statuscode, entity and process timer.
+     *
+     * <p>
+     *     Each endpoint that is annotated with LogEnabled will have its input and output logged.
+     *     Request entity (if present) along with response entity (if present) and the process time
+     *     will be added to the log.
+     *
+     *     The request and response entity has a max length of 197 characters followed by ... to limit
+     *     log size.
+     *
+     *     If a JWT is present in the header of the request, then to subject of the JWT will be logged
+     *     to help track user interaction.
+     *
+     *     The log is limited to logging only if LOG.isDebugEnabled() is true
+     *
+     *     Example of an endpoint using the annotation.
+     * </p>
+     *
+     * <code>
+     *     GET
+     *     Path("/data)
+     *     &#xA9;LogEnabled
+     *     &#xA9;Consumes(MediaType.APPLICATION_JSON)
+     *     &#xA9;Produces(MediaType.APPLICATION_JSON)
+     *     public Response getData() {
+     *        ...
+     *     }
+     * </code>
+     */
+
     private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_EXECUTION_TIME = "Execution-Time";
