@@ -1,10 +1,10 @@
 package dk.bankdata.api.jaxrs.jwt;
 
-import org.jose4j.jwt.JwtClaims;
-
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
+
+import org.jose4j.jwt.JwtClaims;
 
 @Any
 public class JwtToken {

@@ -2,15 +2,11 @@ package dk.bankdata.api.jaxrs.logging;
 
 import static dk.bankdata.api.jaxrs.logging.Logging.LogEnabled;
 
-import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -18,6 +14,12 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
+
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -82,14 +84,14 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         if (jwt != null) {
             try {
                 String pureJwt = jwt.replace("Bearer ", "");
-                JWT jwtObject = JWTParser.parse(pureJwt);
-                JWTClaimsSet jwtClaimsSet = jwtObject.getJWTClaimsSet();
+                JwtConsumer jwtConsumer = new JwtConsumerBuilder().build();
+                JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
 
-                String jwtSubject = jwtClaimsSet.getSubject();
+                String jwtSubject = jwtClaims.getSubject();
 
                 MDC.put(KEY_SUBJECT, jwtSubject);
 
-            } catch (ParseException e) {
+            } catch (InvalidJwtException | MalformedClaimException e) {
                 LOG.error("LoggingFilter failed with message {} ", e.getMessage());
             }
         }

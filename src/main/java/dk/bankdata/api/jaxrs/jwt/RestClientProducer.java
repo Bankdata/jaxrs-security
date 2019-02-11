@@ -28,6 +28,7 @@ import javax.ws.rs.client.Client;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 @ApplicationScoped
+@Deprecated
 public class RestClientProducer {
     private String proxyUrl;
 

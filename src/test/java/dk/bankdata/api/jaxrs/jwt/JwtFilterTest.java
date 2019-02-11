@@ -1,6 +1,6 @@
 package dk.bankdata.api.jaxrs.jwt;
 
-import static dk.bankdata.api.jaxrs.jwt.JwtFilter.OpenApi;
+import static dk.bankdata.api.jaxrs.jwt.JwtFilter.PublicApi;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -16,16 +16,15 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JwtFilterTest {
-    @InjectMocks @Spy JwtFilter jwtFilter;
+    @InjectMocks JwtFilter jwtFilter;
     @Mock ResourceInfo resourceInfo;
 
     @Test
-    public void shouldEscapeIfAnnotatedWithOpenApi() throws Exception {
+    public void shouldEscapeIfAnnotatedWithPublicApi() throws Exception {
         when(resourceInfo.getResourceMethod()).thenReturn(TestMethods.class.getDeclaredMethod("methodWithAnnotation"));
 
         jwtFilter.filter(null);
@@ -64,7 +63,7 @@ public class JwtFilterTest {
     private static class TestMethods {
         void methodWithoutAnnotation() {}
 
-        @OpenApi
+        @PublicApi
         void methodWithAnnotation() {}
     }
 }
