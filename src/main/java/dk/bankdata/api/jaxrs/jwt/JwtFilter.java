@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import dk.bankdata.api.types.ProblemDetails;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,10 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.client.Client;
@@ -28,7 +25,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
@@ -42,61 +38,58 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Client;
-
+/**
+ * JWT validation of rest APIs.
+ *
+ * <p>When this filter is attached to an application it will automatically validate and verify any
+ * endpoint not annotated with &#xA9;PublicApi
+ *
+ * <p>To construct a JwtFilter it requires a list of audiences and a list of issuers.
+ * Every issuer supplied with have its jwks' downloaded and cached for as long as the application is running.
+ *
+ * <p>The jwt is validated using jose4j which is hosted here (@Link https://bitbucket.org/b_c/jose4j/overview)
+ * </p>
+ * <pre>
+ *            JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+ *                     .setRequireExpirationTime()
+ *                     .setAllowedClockSkewInSeconds(30)
+ *                     .setRequireNotBefore()
+ *                     .setRequireSubject()
+ *                     .setExpectedAudience(...)
+ *                     .setExpectedIssuers(true, ...)
+ *                     .setVerificationKeyResolver(...)
+ *                     .build();
+ * </pre>
+ *
+ * <pre>
+ * &#xA9;javax.ws.rs.ApplicationPath("/")
+ * public class RestApplication extends javax.ws.rs.core.Application {
+ *      List&lt;String&gt; audiences = Arrays.asList("some-audience");
+ *      List&lt;String&gt; issuers = Arrays.asList("some-issuer-1", "some-issuer-3", "some-issuer-3");
+ *
+ *      JwtFilter jwtFilter = new JwtFilter(audiences, issuers);
+ *
+ *      &#xA9;Override
+ *      public Set&lt;Class&lt;?&gt;&gt; getSingletons() {
+ *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
+ *          singletons.add(jwtFilter);
+ *
+ *          return singletons;
+ *      }
+ * }
+ * </pre>
+ */
 @Provider
-@ApplicationScoped
 @Priority(Priorities.AUTHENTICATION)
 public class JwtFilter implements ContainerRequestFilter {
-    /**
-     * JWT validation of rest APIs.
-     *
-     * <p>
-     *      When this filter is attached to an application it will automatically validate and verify any
-     *      endpoint not annotated with &#xA9;PublicApi
-     *
-     *      To construct a JwtFilter it requires a list of audiences and a list of issuers.
-     *      Every issuer supplied with have its jwks' downloaded and cached for as long as the application is running.
 
-     *      The jwt is validated using jose4j which is hosted here (@Link https://bitbucket.org/b_c/jose4j/overview)
-     * </p>
-     * <code>
-     *            JwtConsumer jwtConsumer = new JwtConsumerBuilder()
-     *                     .setRequireExpirationTime()
-     *                     .setAllowedClockSkewInSeconds(30)
-     *                     .setRequireNotBefore()
-     *                     .setRequireSubject()
-     *                     .setExpectedAudience(...)
-     *                     .setExpectedIssuers(true, ...)
-     *                     .setVerificationKeyResolver(...)
-     *                     .build();
-     * </code>
-     *
-     * <code>
-     * &#xA9;javax.ws.rs.ApplicationPath("/")
-     * public class RestApplication extends javax.ws.rs.core.Application {
-     *      List&lt;String&gt; audiences = Arrays.asList("some-audience");
-     *      List&lt;String&gt; issuers = Arrays.asList("some-issuer-1", "some-issuer-3", "some-issuer-3");
-     *
-     *      JwtFilter jwtFilter = new JwtFilter(audiences, issuers);
-     *
-     *      &#xA9;Override
-     *      public Set&lt;Class&lt;?&gt;&gt; getSingletons() {
-     *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
-     *          singletons.add(jwtFilter);
-     *
-     *          return singletons;
-     *      }
-     * }
-     * </code>
-     *
-     */
-
+    public static final String JWT_ATTRIBUTE = "JWT";
     private static final Logger LOG = LoggerFactory.getLogger(JwtFilter.class);
+    private static final long CONNECTION_TIMEOUT = 10000;
+    private static final long READ_TIMEOUT = 10000;
 
-    @Context ResourceInfo resourceInfo;
-
-    @Inject JwtToken jwtToken;
+    @Context private ResourceInfo resourceInfo;
+    @Context private HttpServletRequest request;
 
     private List<String> approvedAudiences;
     private List<String> approvedIssuers;
@@ -143,17 +136,16 @@ public class JwtFilter implements ContainerRequestFilter {
                     .setAllowedClockSkewInSeconds(30)
                     .setRequireNotBefore()
                     .setRequireSubject()
-                    .setExpectedAudience(String.join(",", approvedAudiences))
-                    .setExpectedIssuers(true, String.join(",", approvedIssuers))
+                    .setExpectedAudience(approvedAudiences.toArray(new String[0]))
+                    .setExpectedIssuers(true, approvedIssuers.toArray(new String[0]))
                     .setVerificationKeyResolver(new JwksVerificationKeyResolver(getJsonWebKeySet().getJsonWebKeys()))
                     .build();
 
             String jwt = authorizationHeader.replace("Bearer ", "");
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jwt);
 
-            jwtToken.setJwtClaims(jwtClaims);
-            jwtToken.setJwt(jwt);
-
+            JwtToken jwtToken = new JwtToken(jwtClaims);
+            request.setAttribute(JWT_ATTRIBUTE, jwtToken);
 
         } catch (InvalidJwtException e) {
             LOG.error("Unable to authenticate user", e);
@@ -185,7 +177,6 @@ public class JwtFilter implements ContainerRequestFilter {
                     .build();
 
             requestContext.abortWith(response);
-            return;
         }
     }
 
@@ -220,8 +211,6 @@ public class JwtFilter implements ContainerRequestFilter {
 
     private Response executeApiCall(String url) {
         Response response = null;
-        final long CONNECTION_TIMEOUT = 10000;
-        final long READ_TIMEOUT = 10000;
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
@@ -283,5 +272,6 @@ public class JwtFilter implements ContainerRequestFilter {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface PublicApi {}
+    public @interface PublicApi {
+    }
 }

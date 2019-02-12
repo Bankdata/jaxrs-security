@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
@@ -20,7 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JwtFilterTest {
-    @InjectMocks JwtFilter jwtFilter;
+    @InjectMocks JwtFilter jwtFilter = new JwtFilter(Collections.emptyList(), Collections.emptyList(), null);
     @Mock ResourceInfo resourceInfo;
 
     @Test

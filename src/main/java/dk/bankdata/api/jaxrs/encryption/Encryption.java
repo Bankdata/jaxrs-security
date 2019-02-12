@@ -3,31 +3,29 @@ package dk.bankdata.api.jaxrs.encryption;
 import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import javax.enterprise.context.ApplicationScoped;
 
-@ApplicationScoped
+/**
+ * Encryption is to be used to obfuscate sensitive data.
+ *
+ * <p>
+ *     The cipher key has to be 128 bit or 32 characters
+ *
+ *     Encrypted data will be returned as Base64 encoded
+ *     Decrypted data is returned as a String
+ * </p>
+ *
+ * <pre>
+ *      Encryption enc = new Encryption("some-secret-key");
+ *      String encrypted = enc.encrypt("sensitive-data");
+ * </pre>
+ * <pre>
+ *      Encryption enc = new Encryption("some-secret-key");
+ *      String decrypted = enc.decrypt(encrypted);
+ * </pre>
+ */
 public class Encryption {
-    /**
-     * Encryption is to be used to obfuscate sensitive data.
-     *
-     * <p>
-     *     The cipher key has to be 128 bit or 32 characters
-     *
-     *     Encrypted data will be returned as Base64 encoded
-     *     Decrypted data is returned as a String
-     * </p>
-     *
-     * <code>
-     *      Encryption enc = new Encryption("some-secret-key");
-     *      String encrypted = enc.encrypt("sensitive-data");
-     * </code>
-     * <code>
-     *      Encryption enc = new Encryption("some-secret-key");
-     *      String decrypted = enc.decrypt(encrypted);
-     * </code>
-     */
 
-    private String cipherKey;
+    private final String cipherKey;
 
     public Encryption(String cipherKey) {
         this.cipherKey = cipherKey;

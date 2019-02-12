@@ -7,48 +7,46 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
+/**
+ * Sets up a Filter responsible for reasonable Cross-Origin Resource Sharing (CORS).
+ *
+ * <p>There are two ways to configure this filter.
+ * <ol>
+ *  <li>Use the default configuration or</li>
+ *  <li>provide a custom configuration via the constructor</li>
+ * </ol>
+ *
+ * <p>To be able to configure the filter with a custom filter you will have to make a class that
+ * extends javax.ws.rs.core.Application and override Set&lt;Object&gt; getSingletons()
+ * </p>
+ *
+ * <code>
+ * &#xA9;javax.ws.rs.ApplicationPath("/")
+ * public class RestApplication extends javax.ws.rs.core.Application {
+ *      CorsConfiguration CorsConfiguration = new CorsConfiguration()
+ *      .allowMethods(...)
+ *      .allowHeaders(...)
+ *      .maxAge(...);
+ *
+ *      CorsFilter corsFilter = new CorsFilter(corsConfiguration);
+ *
+ *      &#xA9;Override
+ *      public Set&lt;Class&lt;?&gt;&gt; getSingletons() {
+ *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
+ *          singletons.add(corsFilter);
+ *
+ *          return singletons;
+ *      }
+ * }
+ * </code>
+ **/
 @Provider
 public class CorsFilter implements ContainerResponseFilter {
-    /**
-     * Sets up a Filter responsible for reasonable Cross-Origin Resource Sharing (CORS).
-     * <p>
-     * There are two ways to configure this filter.
-     *  1> Use the default configuration or
-     *  2> provide a custom configuration via the constructor
-     * </p>
-     *
-     * @Param corsConfiguration - custom configuration if defaults needs to be changed.
-     *
-     * <p>
-     * To be able to configure the filter with a custom filter you will have to make a class that
-     * extends javax.ws.rs.core.Application and override Set&lt;Object&gt; getSingletons()
-     * </p>
-     *
-     * <code>
-     * &#xA9;javax.ws.rs.ApplicationPath("/")
-     * public class RestApplication extends javax.ws.rs.core.Application {
-     *      CorsConfiguration CorsConfiguration = new CorsConfiguration()
-     *      .allowMethods(...)
-     *      .allowHeaders(...)
-     *      .maxAge(...);
-     *
-     *      CorsFilter corsFilter = new CorsFilter(corsConfiguration);
-     *
-     *      &#xA9;Override
-     *      public Set&lt;Class&lt;?&gt;&gt; getSingletons() {
-     *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
-     *          singletons.add(corsFilter);
-     *
-     *          return singletons;
-     *      }
-     * }
-     * </code>
-     **/
 
-    private CorsConfiguration corsConfiguration;
+    private final CorsConfiguration corsConfiguration;
 
     public CorsFilter() {
-        this.corsConfiguration = new CorsConfiguration();
+        this(new CorsConfiguration());
     }
 
     public CorsFilter(CorsConfiguration corsConfiguration) {
@@ -60,8 +58,6 @@ public class CorsFilter implements ContainerResponseFilter {
         String origin = requestContext.getHeaderString("origin");
 
         if (origin != null) {
-            if (corsConfiguration == null) corsConfiguration = new CorsConfiguration();
-
             MultivaluedMap<String, Object> headers = responseContext.getHeaders();
             headers.add("Access-Control-Allow-Methods", corsConfiguration.getAllowMethods());
             headers.add("Access-Control-Allow-Headers",corsConfiguration.getAllowHeaders());
