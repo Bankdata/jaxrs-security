@@ -38,6 +38,7 @@ dependencies {
     compile(group: 'dk.bankdata.api', name:'types', version: project['dk.bankdata.api.version'])
     compile(group: 'org.json', name: 'json', version: project['org.json.version'])
 
+    testCompile(group: 'javax', name: 'javaee-api', version: project['javax.version'])
     testCompile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
     testCompile(group: 'junit', name: 'junit', version: project['junit.version'])
     testCompile(group: "org.mockito", name: "mockito-core", version: project['org.mockito.version'])
