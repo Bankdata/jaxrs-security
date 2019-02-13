@@ -23,14 +23,8 @@ test {
 }
 
 repositories {
-    maven {
-        url 'https://artifactory.tools.bdpnet.dk/artifactory/plugins-release'
-    }
-    maven {
-        url 'https://artifactory.tools.bdpnet.dk/artifactory/jcenter/'
-    }
-//    mavenLocal()
-//    mavenCentral()
+    mavenLocal()
+    mavenCentral()
 }
 
 dependencies {
