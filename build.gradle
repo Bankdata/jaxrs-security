@@ -1,5 +1,5 @@
 
-group 'dk.bankdata.api'
+group 'dk.bankdata.jaxrs'
 
 apply plugin: 'java'
 apply plugin: 'signing'
@@ -28,12 +28,13 @@ repositories {
 }
 
 dependencies {
-    compile(group: "javax", name: "javaee-api", version: project['javax.version'])
+    compileOnly(group: 'javax', name: 'javaee-api', version: project['javax.version'])
     compile(group: 'org.jboss.resteasy', name: 'resteasy-client', version: project['org.jboss.resteasy.version'])
-    compile(group: 'org.slf4j', name: 'slf4j-log4j12', version: project['org.slf4j.version'])
+    compile(group: 'org.slf4j', name: 'slf4j-api', version: project['org.slf4j.version'])
+    compileOnly(group: 'org.slf4j', name: 'slf4j-log4j12', version: project['org.slf4j.version'])
     compile(group: 'org.bitbucket.b_c', name: 'jose4j', version: project['org.bitbucket.b_c.version'])
     compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
-    compile(group: "com.fasterxml.jackson.jaxrs", name: "jackson-jaxrs-json-provider", version: project['com.fasterxml.jackson.version'])
+    compile(group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: project['com.fasterxml.jackson.version'])
     compile(group: 'dk.bankdata.api', name:'types', version: project['dk.bankdata.api.version'])
     compile(group: 'org.json', name: 'json', version: project['org.json.version'])
 
@@ -78,8 +79,8 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             customizePom(pom)
-            groupId 'dk.bankdata.api'
-            artifactId 'jaxrs-util'
+            groupId 'dk.bankdata.jaxrs'
+            artifactId 'security'
             version version
 
             from components.java
@@ -137,7 +138,7 @@ def customizePom(pom) {
             resolveStrategy = Closure.DELEGATE_FIRST
 
             name 'Jaxrs Security utility'
-            description 'Jaxrs Security utility for use in implementing financial APIs'
+            description 'JAX-RS Security utilities for use in implementing financial APIs'
             url 'https://github.com/Bankdata/jaxrs-security'
             scm {
                 connection 'scm:git:https://github.com/Bankdata/jaxrs-security.git'
@@ -156,6 +157,13 @@ def customizePom(pom) {
                     id 'bogedal'
                     name 'Kenneth Bøgedal'
                     email 'kbh@bankdata.dk'
+                    organization 'Bankdata'
+                    organizationUrl 'https://www.bankdata.dk'
+                }
+                developer {
+                    id 'langecode'
+                    name 'Thor Anker Kvisgård Lange'
+                    email 'tel@bankdata.dk'
                     organization 'Bankdata'
                     organizationUrl 'https://www.bankdata.dk'
                 }
