@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  *      JwtFilter jwtFilter = new JwtFilter(audiences, issuers);
  *
  *      &#xA9;Override
- *      public Set&lt;Class&lt;?&gt;&gt; getSingletons() {
+ *      public Set&lt;Object&lt;?&gt;&gt; getSingletons() {
  *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
  *          singletons.add(jwtFilter);
  *
