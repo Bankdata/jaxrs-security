@@ -1,5 +1,6 @@
 package dk.bankdata.api.jaxrs.jwt;
 
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 public class JwtTokenProducer {
 
     @Produces
+    @RequestScoped
     public JwtToken getTokenFromRequest(HttpServletRequest request) {
         return (JwtToken) request.getAttribute(JwtFilter.JWT_ATTRIBUTE);
     }
