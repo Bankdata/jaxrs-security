@@ -6,7 +6,11 @@ import org.jose4j.jwt.JwtClaims;
  * Contains JWT information.
  */
 public class JwtToken {
-    private final JwtClaims jwtClaims;
+    private JwtClaims jwtClaims;
+
+    protected JwtToken() {
+        this(null);
+    }
 
     public JwtToken(JwtClaims jwtClaims) {
         this.jwtClaims = jwtClaims;

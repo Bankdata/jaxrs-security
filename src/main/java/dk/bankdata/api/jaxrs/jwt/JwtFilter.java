@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * JWT validation of rest APIs.
  *
  * <p>When this filter is attached to an application it will automatically validate and verify any
- * endpoint not annotated with &#xA9;PublicApi
+ * endpoint not annotated with &#x40;PublicApi
  *
  * <p>To construct a JwtFilter it requires a list of audiences and a list of issuers.
  * Every issuer supplied with have its jwks' downloaded and cached for as long as the application is running.
@@ -52,16 +52,16 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <pre>
- * &#xA9;javax.ws.rs.ApplicationPath("/")
+ * &#x40;javax.ws.rs.ApplicationPath("/")
  * public class RestApplication extends javax.ws.rs.core.Application {
  *      List&lt;String&gt; audiences = Arrays.asList("some-audience");
  *      List&lt;String&gt; issuers = Arrays.asList("some-issuer-1", "some-issuer-3", "some-issuer-3");
  *
  *      JwtFilter jwtFilter = new JwtFilter(audiences, issuers);
  *
- *      &#xA9;Override
+ *      &#x40;Override
  *      public Set&lt;Object&lt;?&gt;&gt; getSingletons() {
- *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons);
+ *          Set&lt;Object&gt; singletons = new HashSet&lt;&gt;(super.getSingletons());
  *          singletons.add(jwtFilter);
  *
  *          return singletons;
