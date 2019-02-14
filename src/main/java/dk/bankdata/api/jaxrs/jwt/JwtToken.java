@@ -8,7 +8,9 @@ import org.jose4j.jwt.JwtClaims;
 public class JwtToken {
     private JwtClaims jwtClaims;
 
-    protected JwtToken() {}
+    protected JwtToken() {
+        this(null);
+    }
 
     public JwtToken(JwtClaims jwtClaims) {
         this.jwtClaims = jwtClaims;
