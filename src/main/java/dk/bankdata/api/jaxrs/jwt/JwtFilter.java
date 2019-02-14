@@ -11,7 +11,6 @@ import java.net.Proxy;
 import java.net.URI;
 import java.util.List;
 import javax.annotation.Priority;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -79,9 +78,6 @@ public class JwtFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    @Context
-    private HttpServletRequest request;
-
     private final List<String> approvedAudiences;
     private final List<String> approvedIssuers;
     private final OidcKeyResolver keyResolver;
@@ -138,7 +134,7 @@ public class JwtFilter implements ContainerRequestFilter {
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jwt);
 
             JwtToken jwtToken = new JwtToken(jwtClaims);
-            request.setAttribute(JWT_ATTRIBUTE, jwtToken);
+            requestContext.setProperty(JWT_ATTRIBUTE, jwtToken);
 
         } catch (InvalidJwtException e) {
             LOG.error("Unable to authenticate user", e);
