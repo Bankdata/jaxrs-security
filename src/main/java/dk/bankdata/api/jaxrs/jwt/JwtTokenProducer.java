@@ -2,16 +2,20 @@ package dk.bankdata.api.jaxrs.jwt;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
-import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 
 /**
  * CDI producer to fetch JWT from http request.
  */
 public class JwtTokenProducer {
 
+    @Context
+    private ContainerRequestContext request;
+
     @Produces
     @RequestScoped
-    public JwtToken getTokenFromRequest(HttpServletRequest request) {
-        return (JwtToken) request.getAttribute(JwtFilter.JWT_ATTRIBUTE);
+    public JwtToken getTokenFromRequest() {
+        return (JwtToken) request.getProperty(JwtFilter.JWT_ATTRIBUTE);
     }
 }
