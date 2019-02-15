@@ -11,8 +11,6 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
@@ -61,9 +59,6 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_EXECUTION_TIME = "Execution-Time";
     private static final String KEY_HTTP_STATUS = "http-status";
-
-    @Context
-    private ResourceInfo resourceInfo;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
