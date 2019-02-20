@@ -130,10 +130,10 @@ public class JwtFilter implements ContainerRequestFilter {
                     .setVerificationKeyResolver(keyResolver)
                     .build();
 
-            String jwt = authorizationHeader.replace("Bearer ", "");
-            JwtClaims jwtClaims = jwtConsumer.processToClaims(jwt);
+            String jws = authorizationHeader.replace("Bearer ", "");
+            JwtClaims jwtClaims = jwtConsumer.processToClaims(jws);
 
-            JwtToken jwtToken = new JwtToken(jwtClaims);
+            JwtToken jwtToken = new JwtToken(jwtClaims, jws);
             requestContext.setProperty(JWT_ATTRIBUTE, jwtToken);
 
         } catch (InvalidJwtException e) {
