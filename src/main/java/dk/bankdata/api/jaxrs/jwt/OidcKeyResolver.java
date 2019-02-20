@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jose4j.http.Get;
 import org.jose4j.jwk.HttpsJwks;
 import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.VerificationJwkSelector;
@@ -79,6 +80,11 @@ public class OidcKeyResolver implements VerificationKeyResolver {
             if (keySet == null) {
                 Map<String, Object> openIdConfig = getWellKnown(issuer);
                 keySet = new HttpsJwks(openIdConfig.get("jwks_uri").toString());
+                if (proxy != null) {
+                    Get get = new Get();
+                    get.setHttpProxy(proxy);
+                    keySet.setSimpleHttpGet(get);
+                }
                 jwks.put(issuer, keySet);
             }
             return keySet;
