@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class JwtFilterTest {
     @InjectMocks JwtFilter jwtFilter = new JwtFilter(Collections.emptyList(), Collections.emptyList(), null);
     @Mock ResourceInfo resourceInfo;
+    @Mock RequestContainer requestContainer;
 
     @Test
     public void shouldEscapeIfAnnotatedWithPublicApi() throws Exception {

@@ -11,6 +11,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.util.List;
 import javax.annotation.Priority;
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -71,6 +72,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtFilter implements ContainerRequestFilter {
+    @Inject RequestContainer requestContainer;
 
     public static final String JWT_ATTRIBUTE = "JWT";
     private static final Logger LOG = LoggerFactory.getLogger(JwtFilter.class);
@@ -82,6 +84,7 @@ public class JwtFilter implements ContainerRequestFilter {
     private final List<String> approvedIssuers;
     private final OidcKeyResolver keyResolver;
 
+    @Inject
     public JwtFilter(@NotNull List<String> approvedAudiences, @NotNull List<String> approvedIssuers, URI proxy) {
         this.approvedAudiences = approvedAudiences;
         this.approvedIssuers = approvedIssuers;
@@ -118,6 +121,8 @@ public class JwtFilter implements ContainerRequestFilter {
             requestContext.abortWith(response);
             return;
         }
+
+        requestContainer.setContainerRequestContext(requestContext);
 
         try {
             JwtConsumer jwtConsumer = new JwtConsumerBuilder()
