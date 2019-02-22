@@ -156,7 +156,7 @@ public class Api {
     @Produces({MediaType.APPLICATION_JSON, "application/vnd.data-v1+json"})
     public Response getData() {
         // endpoint logic        
-        return Response.ok().type("application/vnd.relationsbank-v1+json").entity(data).build();
+        return Response.ok().type("application/vnd.data-v1+json").entity(data).build();
     }
 }
 ```
