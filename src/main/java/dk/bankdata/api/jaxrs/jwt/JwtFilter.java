@@ -78,7 +78,6 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtFilter implements ContainerRequestFilter {
-    public static final String JWT_ATTRIBUTE = "JWT";
     private static final Logger LOG = LoggerFactory.getLogger(dk.bankdata.api.jaxrs.jwt.JwtFilter.class);
 
     @Context
