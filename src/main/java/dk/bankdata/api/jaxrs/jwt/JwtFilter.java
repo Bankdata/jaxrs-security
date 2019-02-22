@@ -78,7 +78,8 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtFilter implements ContainerRequestFilter {
-    private static final Logger LOG = LoggerFactory.getLogger(dk.bankdata.api.jaxrs.jwt.JwtFilter.class);
+    public static final String JWT_ATTRIBUTE = "JWT";
+    private static final Logger LOG = LoggerFactory.getLogger(JwtFilter.class);
 
     @Context
     private ResourceInfo resourceInfo;
@@ -137,9 +138,10 @@ public class JwtFilter implements ContainerRequestFilter {
 
             String jws = authorizationHeader.replace("Bearer ", "");
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jws);
+            JwtToken jwtToken = new JwtToken(jwtClaims, jws);
 
-            storeJwtTokenInContainer(jws, jwtClaims);
-
+            storeJwtTokenInContainer(jwtToken);
+            requestContext.setProperty(JWT_ATTRIBUTE, jwtToken);
         } catch (InvalidJwtException e) {
             LOG.error("Unable to authenticate user", e);
 
@@ -174,14 +176,13 @@ public class JwtFilter implements ContainerRequestFilter {
     }
 
     @SuppressWarnings("unchecked")
-    private void storeJwtTokenInContainer(String jws, JwtClaims jwtClaims) {
+    private void storeJwtTokenInContainer(JwtToken jwtToken) {
         BeanManager bm = CDI.current().getBeanManager();
         Bean<JwtTokenContainer> bean =
                 (Bean<JwtTokenContainer>) bm.getBeans(JwtTokenContainer.class).iterator().next();
         CreationalContext<JwtTokenContainer> ctx = bm.createCreationalContext(bean);
         JwtTokenContainer container = (JwtTokenContainer) bm.getReference(bean, JwtTokenContainer.class, ctx);
 
-        JwtToken jwtToken = new JwtToken(jwtClaims, jws);
         container.setJwtToken(jwtToken);
     }
 
