@@ -2,6 +2,7 @@ package dk.bankdata.api.jaxrs.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.jose4j.http.Get;
 import org.jose4j.jwk.HttpsJwks;
 import org.jose4j.jwk.JsonWebKey;
@@ -68,7 +70,8 @@ public class OidcKeyResolver implements VerificationKeyResolver {
         }
 
         if (key == null) {
-            throw new UnresolvableKeyException("Unable to find matching key for JWS based on issuer OpenId Connect Discovery");
+            throw new UnresolvableKeyException("Unable to find matching key for " +
+                    "JWS based on issuer OpenId Connect Discovery");
         }
 
         return key.getKey();

@@ -20,7 +20,7 @@ public class ValidationException extends RuntimeException {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValidationException that = (ValidationException) o;
+        ValidationException that = (ValidationException)o;
         return Objects.equals(problemDetails, that.problemDetails);
     }
 
