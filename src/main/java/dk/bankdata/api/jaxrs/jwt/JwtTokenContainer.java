@@ -6,8 +6,6 @@ import javax.enterprise.context.RequestScoped;
 public class JwtTokenContainer {
     private JwtToken jwtToken;
 
-    public JwtTokenContainer() {}
-
     public JwtToken getJwtToken() {
         return jwtToken;
     }
