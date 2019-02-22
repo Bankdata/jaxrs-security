@@ -1,6 +1,7 @@
 package dk.bankdata.api.jaxrs.jwt;
 
 import dk.bankdata.api.types.ProblemDetails;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,7 +11,12 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.util.List;
+
 import javax.annotation.Priority;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -19,6 +25,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.ErrorCodes;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -71,7 +78,6 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtFilter implements ContainerRequestFilter {
-
     public static final String JWT_ATTRIBUTE = "JWT";
     private static final Logger LOG = LoggerFactory.getLogger(JwtFilter.class);
 
@@ -132,10 +138,10 @@ public class JwtFilter implements ContainerRequestFilter {
 
             String jws = authorizationHeader.replace("Bearer ", "");
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jws);
-
             JwtToken jwtToken = new JwtToken(jwtClaims, jws);
-            requestContext.setProperty(JWT_ATTRIBUTE, jwtToken);
 
+            storeJwtTokenInContainer(jwtToken);
+            requestContext.setProperty(JWT_ATTRIBUTE, jwtToken);
         } catch (InvalidJwtException e) {
             LOG.error("Unable to authenticate user", e);
 
@@ -167,6 +173,17 @@ public class JwtFilter implements ContainerRequestFilter {
 
             requestContext.abortWith(response);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void storeJwtTokenInContainer(JwtToken jwtToken) {
+        BeanManager bm = CDI.current().getBeanManager();
+        Bean<JwtTokenContainer> bean =
+                (Bean<JwtTokenContainer>) bm.getBeans(JwtTokenContainer.class).iterator().next();
+        CreationalContext<JwtTokenContainer> ctx = bm.createCreationalContext(bean);
+        JwtTokenContainer container = (JwtTokenContainer) bm.getReference(bean, JwtTokenContainer.class, ctx);
+
+        container.setJwtToken(jwtToken);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
