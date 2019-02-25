@@ -151,7 +151,7 @@ You can annotate a whole class or just a single endpoint.
 public class Api {
     @GET
     @Path("/data")
-    @LogEnabld
+    @LogEnabled
     @Consumes({MediaType.APPLICATION_JSON, "application/vnd.data-v1+json"})
     @Produces({MediaType.APPLICATION_JSON, "application/vnd.data-v1+json"})
     public Response getData() {
