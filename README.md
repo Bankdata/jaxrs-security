@@ -41,7 +41,7 @@ Please make sure to update tests as appropriate.
 
 In the following section there will be provided code examples of each part of this library
 
-#####CORS
+##### CORS
 
 This will setup a filter that will help solve CORS issues. [CORS Wiki](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  
@@ -79,7 +79,7 @@ public class RestApplication extends Application {
 }
 ```
 
-#####Encryption
+##### Encryption
 
 This module can be used to obfuscate sensitive data, which is needed as path params or query params.
 
@@ -121,8 +121,16 @@ public class RestApplication extends Application {
 }
 ```
 
+The signed json web token may be propagated to client using the `JwtClientFilter`:
 
-#####Logging
+```java
+ClientBuilder.newClient()
+    .register(JwtClientFilter.class)
+    .target("...")
+    ...
+```
+
+##### Logging
 
 This will enable logging of in/output of an endpoint along with execution time.
 It will automatically add core variables to Mapped Diagnostic Context (MDC)
