@@ -70,7 +70,7 @@ artifacts {
 }
 
 signing {
-    required { isReleaseVersion }
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
