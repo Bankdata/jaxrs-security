@@ -1,5 +1,6 @@
 package dk.bankdata.api.jaxrs.jwt;
 
+import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -10,6 +11,7 @@ import javax.ws.rs.ext.Provider;
  * Client filter to pass on the signed json web token extracted by {@link JwtFilter}.
  */
 @Provider
+@RequestScoped
 public class JwtClientFilter implements ClientRequestFilter {
 
     @Context
