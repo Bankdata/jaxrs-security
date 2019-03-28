@@ -31,12 +31,17 @@ public class Encryption {
         this.cipherKey = cipherKey;
     }
 
-    public String encrypt(String toBeEncrypted) throws EncryptionException {
+    public String encrypt(String toBeEncrypted, EncryptionOption option) throws EncryptionException {
         try {
             Cipher cipher = createCipher(Cipher.ENCRYPT_MODE);
             byte[] bytes = cipher.doFinal(toBeEncrypted.getBytes());
 
-            return Base64.getEncoder().encodeToString(bytes);
+            if (option.equals(EncryptionOption.URL_ENCODE)) {
+                return Base64.getUrlEncoder().encodeToString(bytes);
+            } else {
+                return Base64.getEncoder().encodeToString(bytes);
+            }
+
         } catch (Exception e) {
             String message = "Encryption failed while encrypting " + toBeEncrypted;
             throw new EncryptionException(message, e);

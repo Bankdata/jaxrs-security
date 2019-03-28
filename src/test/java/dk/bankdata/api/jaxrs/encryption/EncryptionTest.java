@@ -9,9 +9,19 @@ public class EncryptionTest {
         String seed = "Secret-Text";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
 
-        String encrypted = encryption.encrypt(seed);
+        String encrypted = encryption.encrypt(seed, EncryptionOption.NONE);
 
         Assert.assertEquals("Sxzgi2b+T92FTmr5UNw2nA==", encrypted);
+    }
+
+    @Test
+    public void shouldEncryptStringAndUseUrlEncode() {
+        String seed = "Secret-Text";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String encrypted = encryption.encrypt(seed, EncryptionOption.URL_ENCODE);
+
+        Assert.assertEquals("Sxzgi2b-T92FTmr5UNw2nA==", encrypted);
     }
 
     @Test
