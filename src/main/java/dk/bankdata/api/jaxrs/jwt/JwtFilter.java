@@ -109,9 +109,9 @@ public class JwtFilter implements ContainerRequestFilter {
         Method resourceMethod = resourceInfo.getResourceMethod();
         Class<?> resourceClass = resourceInfo.getResourceClass();
 
-        if (resourceMethod.isAnnotationPresent(PublicApi.class) ||
-            resourceClass.isAnnotationPresent(PermitAll.class) ||
-            resourceMethod.isAnnotationPresent(PermitAll.class)) {
+        if (resourceMethod.isAnnotationPresent(PublicApi.class)
+            || resourceClass.isAnnotationPresent(PermitAll.class)
+            || resourceMethod.isAnnotationPresent(PermitAll.class)) {
             return;
         }
 
