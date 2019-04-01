@@ -31,12 +31,16 @@ public class Encryption {
         this.cipherKey = cipherKey;
     }
 
-    public String encrypt(String toBeEncrypted) throws EncryptionException {
+    public String encrypt(String toBeEncrypted) {
+        return encrypt(toBeEncrypted, EncodingType.BASE_64);
+    }
+
+    public String encrypt(String toBeEncrypted, EncodingType encodingType) throws EncryptionException {
         try {
             Cipher cipher = createCipher(Cipher.ENCRYPT_MODE);
             byte[] bytes = cipher.doFinal(toBeEncrypted.getBytes());
 
-            return Base64.getEncoder().encodeToString(bytes);
+            return encodingType.encode(bytes);
         } catch (Exception e) {
             String message = "Encryption failed while encrypting " + toBeEncrypted;
             throw new EncryptionException(message, e);

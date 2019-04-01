@@ -5,13 +5,33 @@ import org.junit.Test;
 
 public class EncryptionTest {
     @Test
-    public void shouldEncryptString() {
+    public void shouldEncryptStringWithOptionNone() {
         String seed = "Secret-Text";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
 
         String encrypted = encryption.encrypt(seed);
 
         Assert.assertEquals("Sxzgi2b+T92FTmr5UNw2nA==", encrypted);
+    }
+
+    @Test
+    public void shouldEncryptString() {
+        String seed = "Secret-Text";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String encrypted = encryption.encrypt(seed, EncodingType.BASE_64);
+
+        Assert.assertEquals("Sxzgi2b+T92FTmr5UNw2nA==", encrypted);
+    }
+
+    @Test
+    public void shouldEncryptStringAndUseUrlEncode() {
+        String seed = "Secret-Text";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String encrypted = encryption.encrypt(seed, EncodingType.URL_ENCODE);
+
+        Assert.assertEquals("Sxzgi2b-T92FTmr5UNw2nA==", encrypted);
     }
 
     @Test
