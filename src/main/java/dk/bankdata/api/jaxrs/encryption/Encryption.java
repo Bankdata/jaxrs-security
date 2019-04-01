@@ -32,20 +32,15 @@ public class Encryption {
     }
 
     public String encrypt(String toBeEncrypted) {
-        return encrypt(toBeEncrypted, EncryptionOption.NONE);
+        return encrypt(toBeEncrypted, EncodingType.BASE_64);
     }
 
-    public String encrypt(String toBeEncrypted, EncryptionOption option) throws EncryptionException {
+    public String encrypt(String toBeEncrypted, EncodingType encodingType) throws EncryptionException {
         try {
             Cipher cipher = createCipher(Cipher.ENCRYPT_MODE);
             byte[] bytes = cipher.doFinal(toBeEncrypted.getBytes());
 
-            if (option.equals(EncryptionOption.URL_ENCODE)) {
-                return Base64.getUrlEncoder().encodeToString(bytes);
-            } else {
-                return Base64.getEncoder().encodeToString(bytes);
-            }
-
+            return encodingType.encode(bytes);
         } catch (Exception e) {
             String message = "Encryption failed while encrypting " + toBeEncrypted;
             throw new EncryptionException(message, e);

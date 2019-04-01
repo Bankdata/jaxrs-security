@@ -19,7 +19,7 @@ public class EncryptionTest {
         String seed = "Secret-Text";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
 
-        String encrypted = encryption.encrypt(seed, EncryptionOption.NONE);
+        String encrypted = encryption.encrypt(seed, EncodingType.BASE_64);
 
         Assert.assertEquals("Sxzgi2b+T92FTmr5UNw2nA==", encrypted);
     }
@@ -29,7 +29,7 @@ public class EncryptionTest {
         String seed = "Secret-Text";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
 
-        String encrypted = encryption.encrypt(seed, EncryptionOption.URL_ENCODE);
+        String encrypted = encryption.encrypt(seed, EncodingType.URL_ENCODE);
 
         Assert.assertEquals("Sxzgi2b-T92FTmr5UNw2nA==", encrypted);
     }
