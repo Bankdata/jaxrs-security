@@ -31,6 +31,10 @@ public class Encryption {
         this.cipherKey = cipherKey;
     }
 
+    public String encrypt(String toBeEncrypted) {
+        return encrypt(toBeEncrypted, EncryptionOption.NONE);
+    }
+
     public String encrypt(String toBeEncrypted, EncryptionOption option) throws EncryptionException {
         try {
             Cipher cipher = createCipher(Cipher.ENCRYPT_MODE);

@@ -5,6 +5,16 @@ import org.junit.Test;
 
 public class EncryptionTest {
     @Test
+    public void shouldEncryptStringWithOptionNone() {
+        String seed = "Secret-Text";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String encrypted = encryption.encrypt(seed);
+
+        Assert.assertEquals("Sxzgi2b+T92FTmr5UNw2nA==", encrypted);
+    }
+
+    @Test
     public void shouldEncryptString() {
         String seed = "Secret-Text";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
