@@ -197,9 +197,11 @@ public class JwtFilter implements ContainerRequestFilter {
 
     /**
      * Marker annotation to mark an API public.
+     *DEPRECATED with the introduction of @PermitAll
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.METHOD})
+    @Deprecated
     public @interface PublicApi {
     }
 }
