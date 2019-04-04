@@ -48,7 +48,7 @@ public class Encryption {
     }
 
     public String decrypt(String toBeDecrypted) {
-        return encrypt(toBeDecrypted, EncodingType.BASE_64);
+        return decrypt(toBeDecrypted, DecodingType.BASE_64);
     }
 
     public String decrypt(String toBeDecrypted, DecodingType decodingType) throws EncryptionException {
