@@ -55,6 +55,7 @@ public class Encryption {
             byte[] decoded = decodingType.decode(toBeDecrypted.getBytes("UTF-8"));
             Cipher cipher = createCipher(Cipher.DECRYPT_MODE);
             byte[] bytes = cipher.doFinal(decoded);
+
             return new String(bytes);
         } catch (Exception e) {
             String message = "Decryption failed while decrypting " + toBeDecrypted;
