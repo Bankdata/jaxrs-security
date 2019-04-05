@@ -39,7 +39,7 @@ public class EncryptionTest {
         String seed = "Sxzgi2b+T92FTmr5UNw2nA==";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
 
-        String decrypted = encryption.decrypt(seed, DecodingType.BASE_64);
+        String decrypted = encryption.decrypt(seed);
 
         Assert.assertEquals("Secret-Text", decrypted);
     }
