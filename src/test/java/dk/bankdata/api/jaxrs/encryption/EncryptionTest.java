@@ -35,6 +35,16 @@ public class EncryptionTest {
     }
 
     @Test
+    public void shouldDecryptString() {
+        String seed = "Sxzgi2b+T92FTmr5UNw2nA==";
+        Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
+
+        String decrypted = encryption.decrypt(seed);
+
+        Assert.assertEquals("Secret-Text", decrypted);
+    }
+
+    @Test
     public void shouldEncryptStringAndUseUrlEncode() {
         String seed = "Secret-Text";
         Encryption encryption = new Encryption("ThisIsOneLongCipherKeyWhichIsOdd");
