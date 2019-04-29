@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.List;
 
 import javax.annotation.Priority;
+import javax.annotation.security.PermitAll;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * JWT validation of rest APIs.
  *
  * <p>When this filter is attached to an application it will automatically validate and verify any
- * endpoint not annotated with &#x40;PublicApi
+ * endpoint not annotated with &#x40;PublicApi or &#x40;PermitAll
  *
  * <p>To construct a JwtFilter it requires a list of audiences and a list of issuers.
  * Every issuer supplied with have its jwks' downloaded and cached for as long as the application is running.
@@ -74,6 +75,9 @@ import org.slf4j.LoggerFactory;
  *      }
  * }
  * </pre>
+ *
+ * @see PermitAll
+ * @see PublicApi
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -103,8 +107,13 @@ public class JwtFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         Method resourceMethod = resourceInfo.getResourceMethod();
+        Class<?> resourceClass = resourceInfo.getResourceClass();
 
-        if (resourceMethod.isAnnotationPresent(PublicApi.class)) return;
+        if (resourceMethod.isAnnotationPresent(PublicApi.class)
+            || resourceClass.isAnnotationPresent(PermitAll.class)
+            || resourceMethod.isAnnotationPresent(PermitAll.class)) {
+            return;
+        }
 
         String authorizationHeader = requestContext.getHeaderString("Authorization");
 
@@ -186,8 +195,13 @@ public class JwtFilter implements ContainerRequestFilter {
         container.setJwtToken(jwtToken);
     }
 
+    /**
+     * Marker annotation to mark an API public.
+     *DEPRECATED with the introduction of @PermitAll
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.METHOD})
+    @Deprecated
     public @interface PublicApi {
     }
 }

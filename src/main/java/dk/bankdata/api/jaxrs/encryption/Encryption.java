@@ -1,6 +1,5 @@
 package dk.bankdata.api.jaxrs.encryption;
 
-import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -31,25 +30,33 @@ public class Encryption {
         this.cipherKey = cipherKey;
     }
 
-    public String encrypt(String toBeEncrypted) throws EncryptionException {
+    public String encrypt(String toBeEncrypted) {
+        return encrypt(toBeEncrypted, EncodingType.BASE_64);
+    }
+
+    public String encrypt(String toBeEncrypted, EncodingType encodingType) throws EncryptionException {
         try {
             Cipher cipher = createCipher(Cipher.ENCRYPT_MODE);
             byte[] bytes = cipher.doFinal(toBeEncrypted.getBytes());
 
-            return Base64.getEncoder().encodeToString(bytes);
+            return encodingType.encode(bytes);
         } catch (Exception e) {
             String message = "Encryption failed while encrypting " + toBeEncrypted;
             throw new EncryptionException(message, e);
         }
     }
 
-    public String decrypt(String toBeDecrypted) throws EncryptionException {
-        try {
-            Cipher cipher = createCipher(Cipher.DECRYPT_MODE);
-            byte[] toBeDecryptedBytes = Base64.getDecoder().decode(toBeDecrypted);
-            byte[] bytes = cipher.doFinal(toBeDecryptedBytes);
+    public String decrypt(String toBeDecrypted) {
+        return decrypt(toBeDecrypted, DecodingType.BASE_64);
+    }
 
-            return new String(bytes);
+    public String decrypt(String toBeDecrypted, DecodingType decodingType) throws EncryptionException {
+        try {
+            byte[] decoded = decodingType.decode(toBeDecrypted.getBytes("UTF-8"));
+            Cipher cipher = createCipher(Cipher.DECRYPT_MODE);
+            byte[] bytes = cipher.doFinal(decoded);
+
+            return new String(bytes, "UTF-8");
         } catch (Exception e) {
             String message = "Decryption failed while decrypting " + toBeDecrypted;
             throw new EncryptionException(message, e);
