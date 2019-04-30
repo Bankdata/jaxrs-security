@@ -19,6 +19,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -112,6 +113,10 @@ public class JwtFilter implements ContainerRequestFilter {
         if (resourceMethod.isAnnotationPresent(PublicApi.class)
             || resourceClass.isAnnotationPresent(PermitAll.class)
             || resourceMethod.isAnnotationPresent(PermitAll.class)) {
+            return;
+        }
+
+        if (HttpMethod.OPTIONS.equalsIgnoreCase(requestContext.getMethod())) {
             return;
         }
 
