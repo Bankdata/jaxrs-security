@@ -1,6 +1,5 @@
 package dk.bankdata.api.jaxrs.jwt;
 
-import static dk.bankdata.api.jaxrs.jwt.JwtFilter.PublicApi;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -104,7 +103,7 @@ public class JwtFilterTest {
         void methodWithoutAnnotation() {
         }
 
-        @PublicApi
+        @PermitAll
         void methodWithAnnotation() {
         }
 
