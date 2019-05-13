@@ -80,6 +80,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
                 String pureJwt = jwt.replace("Bearer ", "");
 
                 JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                        .setSkipAllValidators()
                         .setSkipSignatureVerification()
                         .setSkipVerificationKeyResolutionOnNone()
                         .build();
