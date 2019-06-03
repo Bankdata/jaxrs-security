@@ -78,7 +78,13 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         if (jwt != null) {
             try {
                 String pureJwt = jwt.replace("Bearer ", "");
-                JwtConsumer jwtConsumer = new JwtConsumerBuilder().build();
+
+                JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                        .setSkipAllValidators()
+                        .setSkipSignatureVerification()
+                        .setSkipVerificationKeyResolutionOnNone()
+                        .build();
+
                 JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
 
                 String jwtSubject = jwtClaims.getSubject();

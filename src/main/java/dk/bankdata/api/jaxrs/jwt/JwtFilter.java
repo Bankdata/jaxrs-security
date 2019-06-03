@@ -2,10 +2,6 @@ package dk.bankdata.api.jaxrs.jwt;
 
 import dk.bankdata.api.types.ProblemDetails;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -19,6 +15,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -77,7 +74,6 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * @see PermitAll
- * @see PublicApi
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -109,9 +105,12 @@ public class JwtFilter implements ContainerRequestFilter {
         Method resourceMethod = resourceInfo.getResourceMethod();
         Class<?> resourceClass = resourceInfo.getResourceClass();
 
-        if (resourceMethod.isAnnotationPresent(PublicApi.class)
-            || resourceClass.isAnnotationPresent(PermitAll.class)
+        if (resourceClass.isAnnotationPresent(PermitAll.class)
             || resourceMethod.isAnnotationPresent(PermitAll.class)) {
+            return;
+        }
+
+        if (HttpMethod.OPTIONS.equalsIgnoreCase(requestContext.getMethod())) {
             return;
         }
 
@@ -193,15 +192,5 @@ public class JwtFilter implements ContainerRequestFilter {
         JwtTokenContainer container = (JwtTokenContainer) bm.getReference(bean, JwtTokenContainer.class, ctx);
 
         container.setJwtToken(jwtToken);
-    }
-
-    /**
-     * Marker annotation to mark an API public.
-     *DEPRECATED with the introduction of @PermitAll
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE, ElementType.METHOD})
-    @Deprecated
-    public @interface PublicApi {
     }
 }

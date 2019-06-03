@@ -1,13 +1,14 @@
 package dk.bankdata.api.jaxrs.jwt;
 
-import static dk.bankdata.api.jaxrs.jwt.JwtFilter.PublicApi;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import javax.annotation.security.PermitAll;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
@@ -54,6 +55,18 @@ public class JwtFilterTest {
     }
 
     @Test
+    public void shouldAllowOptionsRequest() throws Exception {
+        when(resourceInfo.getResourceClass()).thenReturn((Class) TestMethods.class);
+        when(resourceInfo.getResourceMethod()).thenReturn(TestMethods.class.getDeclaredMethod("methodWithoutAnnotation"));
+
+        ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
+        when(requestContext.getMethod()).thenReturn(HttpMethod.OPTIONS);
+        jwtFilter.filter(requestContext);
+        verify(requestContext).getMethod();
+        verifyNoMoreInteractions(requestContext);
+    }
+
+    @Test
     public void shouldFailWith401IfNoAuthorizationHeader() throws Exception {
         when(resourceInfo.getResourceClass()).thenReturn((Class) TestMethods.class);
         when(resourceInfo.getResourceMethod()).thenReturn(TestMethods.class.getDeclaredMethod("methodWithoutAnnotation"));
@@ -90,7 +103,7 @@ public class JwtFilterTest {
         void methodWithoutAnnotation() {
         }
 
-        @PublicApi
+        @PermitAll
         void methodWithAnnotation() {
         }
 
