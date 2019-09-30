@@ -1,5 +1,16 @@
 package dk.bankdata.api.jaxrs.logging;
 
+import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_FIELD_NAME;
+import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_HEADER_NAME;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.core.MultivaluedMap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,18 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.core.MultivaluedMap;
-
-import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_FIELD_NAME;
-import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_HEADER_NAME;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CorrelationIdFilterTest {
