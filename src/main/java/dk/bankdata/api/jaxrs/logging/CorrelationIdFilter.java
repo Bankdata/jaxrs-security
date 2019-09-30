@@ -1,23 +1,22 @@
 package dk.bankdata.api.jaxrs.logging;
 
-import org.slf4j.MDC;
-
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import org.slf4j.MDC;
 
 /**
- * Container and Client request filters that will propagate a Correlation ID to logs and downstream if it exists
+ * Container and Client request filters that will propagate a Correlation ID to logs and downstream if it exists.
  */
 public class CorrelationIdFilter implements ContainerRequestFilter, ContainerResponseFilter, ClientRequestFilter {
     static final String CORR_ID_HEADER_NAME = "x-correlation-id";
     static final String CORR_ID_FIELD_NAME = "correlationId";
 
     /**
-     * Injects the correlation ID into MDC, making it available to logging and HTTP clients
+     * Injects the correlation ID into MDC, making it available to logging and HTTP clients.
      */
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -28,7 +27,7 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
     }
 
     /**
-     * Injects the correlation ID into the HTTP client
+     * Injects the correlation ID into the HTTP client.
      */
     @Override
     public void filter(ClientRequestContext requestContext) {
@@ -39,9 +38,7 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
     }
 
     /**
-     * Removes Correlation ID from MDC
-     *
-     * This is done to avoid re-use of the thread wrongly re-using the ID
+     * Removes Correlation ID from MDC to prevent same-thread mix of data.
      */
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {

@@ -1,6 +1,7 @@
 package dk.bankdata.api.jaxrs.logging;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,14 +15,24 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_FIELD_NAME;
 import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_HEADER_NAME;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CorrelationIdFilterTest {
-    @InjectMocks CorrelationIdFilter correlationIdFilter;
+    @InjectMocks
+    CorrelationIdFilter correlationIdFilter;
+
+    @Before
+    public void init() {
+        //We must clear MDC to avoid issues if thread is re-used between two tests
+        MDC.clear();
+    }
 
     @Test
-    public void shouldPutCorrelationIdIntoMDC() {
+    public void shouldPutCorrelationIdIntoMdc() {
         //Arrange
         String corrId = "guid";
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
@@ -55,7 +66,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldNotPutToMDCWhenNoCorrelationId() {
+    public void shouldNotPutToMdcWhenNoCorrelationId() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
 
