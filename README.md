@@ -168,3 +168,40 @@ public class Api {
     }
 }
 ```
+
+##### Correlation ID propagation
+
+This will add the `x-correlation-id` header value into MDC as `correlationId` and also propogate it into HTTP client calls.
+
+As this is a @Provider it has to be added to your application 
+
+```
+public class RestApplication extends Application {
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> providers = new HashSet<>(super.getClasses());
+        
+        providers.add(CorrelationIdFilter.class);
+
+        return providers;
+    }
+}
+```
+
+To output the Correlation ID into your logs, you need to setup your logging configuration to output the `correlationId` field, e.g. for logback console output:
+```
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %X{correlationId} [%thread] %-5level %logger{36} aaa - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
+```

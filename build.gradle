@@ -40,6 +40,7 @@ dependencies {
     testCompile(group: 'org.mockito', name: 'mockito-core', version: project['org.mockito.version'])
     testCompile(group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: project['com.github.tomakehurst.wiremock-jre8.version'])
     testCompile(group: 'org.glassfish.jersey.core', name: 'jersey-common', version: project['org.glassfish.jersey.core.version'])
+    testCompile(group: 'org.slf4j', name: 'slf4j-log4j12', version: project['org.slf4j.version'])
 }
 
 model {
