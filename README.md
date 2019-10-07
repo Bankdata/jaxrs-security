@@ -171,7 +171,7 @@ public class Api {
 
 ##### Correlation ID propagation
 
-This will add the `x-correlation-id` header value into MDC as `correlationId` and also propogate it into HTTP client calls.
+This will add the two correlation ID headers (Client-generated and server-generated) into MDC as `clientCorrelationId` and  `correlationId` respectively and also propagate them into HTTP client calls.
 
 As this is a @Provider it has to be added to your application 
 
@@ -188,7 +188,13 @@ public class RestApplication extends Application {
 }
 ```
 
-To output the Correlation ID into your logs, you need to setup your logging configuration to output the `correlationId` field, e.g. for logback console output:
+Furthermore, the naming of the HTTP headers are defined by two environment variables:
+```
+CORR_ID_HEADER_NAME = Server-generated header
+CLIENT_CORR_ID_HEADER_NAME = Client-generated header
+```
+
+To output the Correlation IDs into your logs, you need to setup your logging configuration to output the MDC fields, e.g. for logback console output:
 ```
 <configuration>
 
@@ -196,7 +202,7 @@ To output the Correlation ID into your logs, you need to setup your logging conf
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %X{correlationId} [%thread] %-5level %logger{36} aaa - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %X{correlationId} %X{clientCorrelationId} [%thread] %-5level %logger{36} aaa - %msg%n</pattern>
         </encoder>
     </appender>
 

@@ -17,6 +17,8 @@ checkstyle {
 }
 
 test {
+    environment "CORR_ID_HEADER_NAME", "x-correlation-id"
+    environment "CLIENT_CORR_ID_HEADER_NAME", "x-client-correlation-id"
     jacoco {
         includes = ['*.*']
     }

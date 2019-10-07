@@ -1,7 +1,5 @@
 package dk.bankdata.api.jaxrs.logging;
 
-import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_FIELD_NAME;
-import static dk.bankdata.api.jaxrs.logging.CorrelationIdFilter.CORR_ID_HEADER_NAME;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -31,26 +29,31 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldPutCorrelationIdIntoMdc() {
+    public void shouldPutCorrelationIdsIntoMdc() {
         //Arrange
         String corrId = "guid";
+        String clientCorrId = "client-guid";
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
-        when(containerRequestContext.getHeaderString(CORR_ID_HEADER_NAME)).thenReturn(corrId);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
 
         //Act
         correlationIdFilter.filter(containerRequestContext);
 
         //Assert
-        Assert.assertEquals(corrId, MDC.get("correlationId"));
+        Assert.assertEquals(corrId, MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME));
+        Assert.assertEquals(clientCorrId, MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME));
     }
 
     @Test
-    public void shouldAddCorrelationIdToClientHeader() {
+    public void shouldAddCorrelationIdsToClientHeader() {
         //Arrange
         String corrId = "guid";
+        String clientCorrId = "client-guid";
 
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
-        when(containerRequestContext.getHeaderString(CORR_ID_HEADER_NAME)).thenReturn(corrId);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
         correlationIdFilter.filter(containerRequestContext);
 
         MultivaluedMap<String, Object> headers = mock(MultivaluedMap.class);
@@ -61,7 +64,8 @@ public class CorrelationIdFilterTest {
         correlationIdFilter.filter(request);
 
         //Assert
-        verify(headers).putSingle(CORR_ID_HEADER_NAME, corrId);
+        verify(headers).putSingle(correlationIdFilter.corrIdHeaderName, corrId);
+        verify(headers).putSingle(correlationIdFilter.clientCorrIdHeaderName, clientCorrId);
     }
 
     @Test
@@ -73,15 +77,13 @@ public class CorrelationIdFilterTest {
         correlationIdFilter.filter(containerRequestContext);
 
         //Assert
-        Assert.assertNull(MDC.get(CORR_ID_FIELD_NAME));
+        Assert.assertNull(MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME));
+        Assert.assertNull(MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME));
     }
 
     @Test
-    public void shouldNotAddHeaderWhenNoCorrelationId() {
+    public void shouldNotAddHeadersWhenNoCorrelationId() {
         //Arrange
-        ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
-
-        //Act
         ClientRequestContext request = mock(ClientRequestContext.class);
 
         //Act
@@ -92,10 +94,11 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldRemoveCorrelationIdAfterResponseFilter() {
+    public void shouldRemoveCorrelationIdsAfterResponseFilter() {
         //Arrange
         String corrId = "guid";
-        MDC.put(CORR_ID_FIELD_NAME, corrId);
+        MDC.put(CorrelationIdFilter.CORR_ID_FIELD_NAME, corrId);
+        MDC.put(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME, corrId);
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         ContainerResponseContext containerResponseContext = mock(ContainerResponseContext.class);
 
@@ -103,6 +106,7 @@ public class CorrelationIdFilterTest {
         correlationIdFilter.filter(containerRequestContext, containerResponseContext);
 
         //Assert
-        Assert.assertNull(MDC.get("correlationId"));
+        Assert.assertNull(MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME));
+        Assert.assertNull(MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME));
     }
 }
