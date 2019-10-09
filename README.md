@@ -173,6 +173,8 @@ public class Api {
 
 This will add the two correlation ID headers (Client-generated and server-generated) into MDC as `clientCorrelationId` and  `correlationId` respectively and also propagate them into HTTP client calls.
 
+Correlation IDs must be UUID v4. If they are not, a warning will be logged and a UUID will be generated instead.
+
 As this is a @Provider it has to be added to your application 
 
 ```

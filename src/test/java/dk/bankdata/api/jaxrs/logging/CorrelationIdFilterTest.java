@@ -31,8 +31,8 @@ public class CorrelationIdFilterTest {
     @Test
     public void shouldPutCorrelationIdsIntoMdc() {
         //Arrange
-        String corrId = "guid";
-        String clientCorrId = "client-guid";
+        String corrId = "3ebd48a3-985b-49b5-88bc-daec919b708e";
+        String clientCorrId = "228e9783-1d49-44e6-8cdd-35961d06e53f";
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
         when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
@@ -48,8 +48,8 @@ public class CorrelationIdFilterTest {
     @Test
     public void shouldAddCorrelationIdsToClientHeader() {
         //Arrange
-        String corrId = "guid";
-        String clientCorrId = "client-guid";
+        String corrId = "98dc94a5-c3ae-451b-a364-97bd190361b2";
+        String clientCorrId = "05cb5684-9c86-473a-8b38-5e83118c05be";
 
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
@@ -81,7 +81,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldPutCorrelationIDToMdcWhenNotPresentInHeader() {
+    public void shouldPutNewCorrelationIDToMdcWhenNotPresentInHeader() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
 
@@ -91,7 +91,7 @@ public class CorrelationIdFilterTest {
         //Assert
         String guid = MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME);
         Assert.assertNotNull(guid);
-        Assert.assertEquals(36, guid.length());
+        Assert.assertTrue(Util.isValidUuid(guid));
     }
 
     @Test
@@ -121,5 +121,29 @@ public class CorrelationIdFilterTest {
         //Assert
         Assert.assertNull(MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME));
         Assert.assertNull(MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME));
+    }
+
+    @Test
+    public void shouldReplaceInvalidUuidWithValidUuid() {
+        //Arrange
+        String corrId = "invalidUuid36CharactersLoooooooooong";
+        String clientCorrId = "anotherInvalidUuid";
+
+        ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
+
+        //Act
+        correlationIdFilter.filter(containerRequestContext);
+
+        //Assert
+        String forwardedCorrId = MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME);
+        String forwardedClientCorrId = MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME);
+
+        Assert.assertNotEquals(corrId, forwardedCorrId);
+        Assert.assertTrue(Util.isValidUuid(forwardedCorrId));
+
+        Assert.assertNotEquals(clientCorrId, forwardedClientCorrId);
+        Assert.assertTrue(Util.isValidUuid(forwardedClientCorrId));
     }
 }
