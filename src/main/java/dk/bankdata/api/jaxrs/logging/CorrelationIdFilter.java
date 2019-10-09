@@ -15,7 +15,7 @@ import org.slf4j.MDC;
  * Container and Client request filters that will propagate Correlation IDs to logs and downstream if it exists.
  */
 public class CorrelationIdFilter implements ContainerRequestFilter, ContainerResponseFilter, ClientRequestFilter {
-    private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdFilter.class);
     
     final String corrIdHeaderName;
     static final String CORR_ID_FIELD_NAME = "correlationId";
