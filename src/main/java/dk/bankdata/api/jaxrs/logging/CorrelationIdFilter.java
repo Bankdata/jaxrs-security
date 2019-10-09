@@ -25,7 +25,6 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
 
 
 
-
     public CorrelationIdFilter() {
         corrIdHeaderName = Util.loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
         clientCorrIdHeaderName = Util.loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
