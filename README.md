@@ -190,9 +190,11 @@ public class RestApplication extends Application {
 
 Furthermore, the naming of the HTTP headers are defined by two environment variables:
 ```
-CORR_ID_HEADER_NAME = Server-generated header
-CLIENT_CORR_ID_HEADER_NAME = Client-generated header
+CORR_ID_HEADER_NAME = Name of the header containing the server-generated correlation ID
+CLIENT_CORR_ID_HEADER_NAME = Name of the header containing the client-generated correlation ID
 ```
+
+If the header containing the server-generated correlation ID is not present, the library will generate a UUID in its place.
 
 To output the Correlation IDs into your logs, you need to setup your logging configuration to output the MDC fields, e.g. for logback console output:
 ```

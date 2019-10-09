@@ -1,5 +1,6 @@
 package dk.bankdata.api.jaxrs.logging;
 
+import java.util.UUID;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -28,8 +29,8 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
      */
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        propagateToMdc(requestContext, corrIdHeaderName, CORR_ID_FIELD_NAME);
-        propagateToMdc(requestContext, clientCorrIdHeaderName, CLIENT_CORR_ID_FIELD_NAME);
+        propagateToMdc(requestContext, corrIdHeaderName, CORR_ID_FIELD_NAME, true);
+        propagateToMdc(requestContext, clientCorrIdHeaderName, CLIENT_CORR_ID_FIELD_NAME, false);
     }
 
     /**
@@ -52,10 +53,12 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
 
 
 
-    private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey) {
+    private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey, boolean createIfMissing) {
         String headerValue = requestContext.getHeaderString(headerName);
         if (headerValue != null) {
             MDC.put(mdcKey, headerValue);
+        } else if (createIfMissing) {
+            MDC.put(mdcKey, UUID.randomUUID().toString());
         }
     }
 

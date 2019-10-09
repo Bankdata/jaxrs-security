@@ -69,7 +69,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldNotPutToMdcWhenNoCorrelationId() {
+    public void shouldNotPutClientCorrelationIDToMdcWhenNotPresentInHeader() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
 
@@ -77,8 +77,21 @@ public class CorrelationIdFilterTest {
         correlationIdFilter.filter(containerRequestContext);
 
         //Assert
-        Assert.assertNull(MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME));
         Assert.assertNull(MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME));
+    }
+
+    @Test
+    public void shouldPutCorrelationIDToMdcWhenNotPresentInHeader() {
+        //Arrange
+        ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+
+        //Act
+        correlationIdFilter.filter(containerRequestContext);
+
+        //Assert
+        String guid = MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME);
+        Assert.assertNotNull(guid);
+        Assert.assertEquals(36, guid.length());
     }
 
     @Test
