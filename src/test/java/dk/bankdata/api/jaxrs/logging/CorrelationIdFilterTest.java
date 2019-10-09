@@ -69,7 +69,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldNotPutClientCorrelationIDToMdcWhenNotPresentInHeader() {
+    public void shouldNotPutClientCorrelationIdToMdcWhenNotPresentInHeader() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
 
@@ -81,7 +81,7 @@ public class CorrelationIdFilterTest {
     }
 
     @Test
-    public void shouldPutNewCorrelationIDToMdcWhenNotPresentInHeader() {
+    public void shouldPutNewCorrelationIdToMdcWhenNotPresentInHeader() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
 
