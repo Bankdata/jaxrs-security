@@ -146,6 +146,7 @@ public class JwtFilter implements ContainerRequestFilter {
 
             String jws = authorizationHeader.replace("Bearer ", "");
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jws);
+
             JwtToken jwtToken = new JwtToken(jwtClaims, jws);
 
             storeJwtTokenInContainer(jwtToken);
