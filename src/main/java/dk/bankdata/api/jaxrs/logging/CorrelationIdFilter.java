@@ -1,12 +1,14 @@
 package dk.bankdata.api.jaxrs.logging;
 
 import java.util.UUID;
+import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -14,6 +16,9 @@ import org.slf4j.MDC;
 /**
  * Container and Client request filters that will propagate Correlation IDs to logs and downstream if it exists.
  */
+
+@Provider
+@Priority(100)
 public class CorrelationIdFilter implements ContainerRequestFilter, ContainerResponseFilter, ClientRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdFilter.class);
     
