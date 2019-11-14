@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.junit.Assert.assertNotNull;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import io.opentracing.util.GlobalTracerTestUtil;
 import java.net.URI;
 import java.security.Key;
 import org.jose4j.jwk.JsonWebKeySet;
