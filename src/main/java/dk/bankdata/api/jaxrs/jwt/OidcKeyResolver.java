@@ -3,6 +3,9 @@ package dk.bankdata.api.jaxrs.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
@@ -82,7 +85,8 @@ public class OidcKeyResolver implements VerificationKeyResolver {
             HttpsJwks keySet = jwks.get(issuer);
             if (keySet == null) {
                 Map<String, Object> openIdConfig = getWellKnown(issuer);
-                keySet = new HttpsJwks(openIdConfig.get("jwks_uri").toString());
+                String jwksUri = openIdConfig.get("jwks_uri").toString();
+                keySet = new HttpsJwks(jwksUri);
                 if (proxy != null) {
                     Get get = new Get();
                     get.setHttpProxy(proxy);
@@ -98,6 +102,14 @@ public class OidcKeyResolver implements VerificationKeyResolver {
     }
 
     private Map<String, Object> getWellKnown(String issuer) throws UnresolvableKeyException {
+        Tracer tracer = GlobalTracer.get();
+        Span span = null;
+        if (tracer != null) {
+            span = tracer
+                    .buildSpan("dk.bankdata.api.jaxrs.jwt.getWellKnown")
+                    .withTag("issuer", issuer)
+                    .start();
+        }
         try {
             URL wellKnownUrl = issuer.endsWith("/")
                     ? new URL(issuer + ".well-known/openid-configuration")
@@ -123,7 +135,14 @@ public class OidcKeyResolver implements VerificationKeyResolver {
             sb.append(" / ");
             Throwable cause = e.getCause();
             sb.append(cause != null ? cause.getMessage() : "cause was null");
+            if (span != null) {
+                span.setTag("error", true);
+            }
             throw new UnresolvableKeyException(sb.toString(), e);
+        } finally {
+            if (span != null) {
+                span.finish();
+            }
         }
     }
 

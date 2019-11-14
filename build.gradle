@@ -36,13 +36,17 @@ dependencies {
     compile(group: 'org.bitbucket.b_c', name: 'jose4j', version: project['org.bitbucket.b_c.version'])
     compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: project['com.fasterxml.jackson.version'])
     compile(group: 'dk.bankdata.api', name:'types', version: project['dk.bankdata.api.version'])
+    compile(group: 'io.opentracing', name:'opentracing-api', version: project['io.opentracing.version'])
+    compile(group: 'io.opentracing', name:'opentracing-util', version: project['io.opentracing.version'])
     
     testCompile(group: 'javax', name: 'javaee-api', version: project['javax.version'])
-    testCompile(group: 'junit', name: 'junit', version: project['junit.version'])
+    testCompile(group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: project['org.junit.jupiter.version'])
     testCompile(group: 'org.mockito', name: 'mockito-core', version: project['org.mockito.version'])
     testCompile(group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: project['com.github.tomakehurst.wiremock-jre8.version'])
     testCompile(group: 'org.glassfish.jersey.core', name: 'jersey-common', version: project['org.glassfish.jersey.core.version'])
     testCompile(group: 'org.slf4j', name: 'slf4j-log4j12', version: project['org.slf4j.version'])
+    testCompile(group: 'io.opentracing', name:'opentracing-mock', version: project['io.opentracing.version'])
+    testCompile(group: 'io.opentracing', name:'opentracing-util', version: project['io.opentracing.version'], classifier: 'tests')
 }
 
 model {

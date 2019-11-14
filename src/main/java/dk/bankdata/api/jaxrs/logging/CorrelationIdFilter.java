@@ -1,5 +1,8 @@
 package dk.bankdata.api.jaxrs.logging;
 
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import java.util.UUID;
 import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
@@ -72,8 +75,11 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
                 LOG.warn("Header '{}' contained non-UUID value, generated new value '{}'", headerName, headerValue);
             }
             MDC.put(mdcKey, headerValue);
+            addTagToActiveSpan(mdcKey, headerValue);
         } else if (createIfMissing) {
-            MDC.put(mdcKey, UUID.randomUUID().toString());
+            headerValue = UUID.randomUUID().toString();
+            MDC.put(mdcKey, headerValue);
+            addTagToActiveSpan(mdcKey, headerValue);
         }
     }
 
@@ -81,6 +87,16 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
         String mdcValue = MDC.get(mdcKey);
         if (mdcValue != null) {
             requestContext.getHeaders().putSingle(headerName, mdcValue);
+        }
+    }
+
+    private void addTagToActiveSpan(String key, String value) {
+        Tracer tracer = GlobalTracer.get();
+        if (tracer != null) {
+            Span span = tracer.activeSpan();
+            if (span != null) {
+                tracer.activeSpan().setTag(key, value);
+            }
         }
     }
 

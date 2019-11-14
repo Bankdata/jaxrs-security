@@ -5,12 +5,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import io.opentracing.Span;
+import io.opentracing.mock.MockSpan;
+import io.opentracing.mock.MockTracer;
+import io.opentracing.util.GlobalTracer;
+import io.opentracing.util.GlobalTracerTestUtil;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MultivaluedMap;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,10 +29,11 @@ public class CorrelationIdFilterTest {
     @InjectMocks
     CorrelationIdFilter correlationIdFilter;
 
-    @Before
-    public void init() {
+    @After
+    public void reset() {
         //We must clear MDC to avoid issues if thread is re-used between two tests
         MDC.clear();
+        GlobalTracerTestUtil.resetGlobalTracer();
     }
 
     @Test
@@ -145,5 +153,51 @@ public class CorrelationIdFilterTest {
 
         Assert.assertNotEquals(clientCorrId, forwardedClientCorrId);
         Assert.assertTrue(Util.isValidUuid(forwardedClientCorrId));
+    }
+
+    @Test
+    public void shouldNotFailIfNoActiveSpan() {
+        //Arrange
+        MockTracer tracer = new MockTracer();
+        GlobalTracer.register(tracer);
+        ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+
+        //Act
+        correlationIdFilter.filter(containerRequestContext);
+
+        //Assert
+        List<MockSpan> finishedSpans = tracer.finishedSpans();
+        Assert.assertEquals(0, finishedSpans.size());
+    }
+
+    @Test
+    public void shouldSetCorrelationIdsTag() {
+        //Arrange
+        String corrId = "3ebd48a3-985b-49b5-88bc-daec919b708e";
+        String clientCorrId = "228e9783-1d49-44e6-8cdd-35961d06e53f";
+
+        ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
+        when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
+
+        MockTracer tracer = new MockTracer();
+        GlobalTracer.register(tracer);
+
+        //Act
+        Span span = tracer.buildSpan("test").start();
+        tracer.scopeManager().activate(span, false);
+        correlationIdFilter.filter(containerRequestContext);
+        span.finish();
+
+
+        //Assert
+        List<MockSpan> finishedSpans = tracer.finishedSpans();
+        Assert.assertEquals(1, finishedSpans.size());
+        MockSpan finishedSpan = finishedSpans.get(0);
+        Assert.assertEquals("test", finishedSpan.operationName());
+        Map<String, Object> tags = finishedSpan.tags();
+        Assert.assertEquals(2, tags.size());
+        Assert.assertEquals(corrId, tags.get(CorrelationIdFilter.CORR_ID_FIELD_NAME));
+        Assert.assertEquals(clientCorrId, tags.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME));
     }
 }
