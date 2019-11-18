@@ -9,8 +9,6 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +20,9 @@ import org.slf4j.MDC;
 
 @Provider
 @Priority(100)
-public class CorrelationIdFilter implements ContainerRequestFilter, ContainerResponseFilter, ClientRequestFilter {
-    private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdFilter.class);
-    
+public class CorrelationIdRequestFilter implements ContainerRequestFilter, ClientRequestFilter {
+    private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdRequestFilter.class);
+
     final String corrIdHeaderName;
     static final String CORR_ID_FIELD_NAME = "correlationId";
 
@@ -33,7 +31,7 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
 
 
 
-    public CorrelationIdFilter() {
+    public CorrelationIdRequestFilter() {
         corrIdHeaderName = Util.loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
         clientCorrIdHeaderName = Util.loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
     }
@@ -55,17 +53,6 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
         propagateToHeader(requestContext, CORR_ID_FIELD_NAME, corrIdHeaderName);
         propagateToHeader(requestContext, CLIENT_CORR_ID_FIELD_NAME, clientCorrIdHeaderName);
     }
-
-    /**
-     * Removes Correlation ID from MDC to prevent same-thread mix of data.
-     */
-    @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-        MDC.remove(CORR_ID_FIELD_NAME);
-        MDC.remove(CLIENT_CORR_ID_FIELD_NAME);
-    }
-
-
 
     private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey, boolean createIfMissing) {
         String headerValue = requestContext.getHeaderString(headerName);
