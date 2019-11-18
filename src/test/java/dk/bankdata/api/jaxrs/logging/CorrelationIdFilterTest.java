@@ -52,8 +52,8 @@ public class CorrelationIdFilterTest {
         correlationIdRequestFilter.filter(containerRequestContext);
 
         //Assert
-        Assert.assertEquals(corrId, MDC.get(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME));
-        Assert.assertEquals(clientCorrId, MDC.get(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME));
+        Assert.assertEquals(corrId, MDC.get(Util.CORR_ID_FIELD_NAME));
+        Assert.assertEquals(clientCorrId, MDC.get(Util.CLIENT_CORR_ID_FIELD_NAME));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class CorrelationIdFilterTest {
         correlationIdRequestFilter.filter(containerRequestContext);
 
         //Assert
-        Assert.assertNull(MDC.get(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME));
+        Assert.assertNull(MDC.get(Util.CLIENT_CORR_ID_FIELD_NAME));
     }
 
     @Test
@@ -100,7 +100,7 @@ public class CorrelationIdFilterTest {
         correlationIdRequestFilter.filter(containerRequestContext);
 
         //Assert
-        String guid = MDC.get(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME);
+        String guid = MDC.get(Util.CORR_ID_FIELD_NAME);
         Assert.assertNotNull(guid);
         Assert.assertTrue(Util.isValidUuid(guid));
     }
@@ -121,8 +121,8 @@ public class CorrelationIdFilterTest {
     public void shouldRemoveCorrelationIdsAfterResponseFilter() {
         //Arrange
         String corrId = "guid";
-        MDC.put(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME, corrId);
-        MDC.put(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME, corrId);
+        MDC.put(Util.CORR_ID_FIELD_NAME, corrId);
+        MDC.put(Util.CLIENT_CORR_ID_FIELD_NAME, corrId);
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         ContainerResponseContext containerResponseContext = mock(ContainerResponseContext.class);
         correlationIdRequestFilter.filter(containerRequestContext);
@@ -131,8 +131,8 @@ public class CorrelationIdFilterTest {
         correlationIdResponseFilter.filter(containerRequestContext, containerResponseContext);
 
         //Assert
-        Assert.assertNull(MDC.get(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME));
-        Assert.assertNull(MDC.get(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME));
+        Assert.assertNull(MDC.get(Util.CORR_ID_FIELD_NAME));
+        Assert.assertNull(MDC.get(Util.CLIENT_CORR_ID_FIELD_NAME));
     }
 
     @Test
@@ -149,8 +149,8 @@ public class CorrelationIdFilterTest {
         correlationIdRequestFilter.filter(containerRequestContext);
 
         //Assert
-        String forwardedCorrId = MDC.get(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME);
-        String forwardedClientCorrId = MDC.get(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME);
+        String forwardedCorrId = MDC.get(Util.CORR_ID_FIELD_NAME);
+        String forwardedClientCorrId = MDC.get(Util.CLIENT_CORR_ID_FIELD_NAME);
 
         Assert.assertNotEquals(corrId, forwardedCorrId);
         Assert.assertTrue(Util.isValidUuid(forwardedCorrId));
@@ -201,7 +201,7 @@ public class CorrelationIdFilterTest {
         Assert.assertEquals("test", finishedSpan.operationName());
         Map<String, Object> tags = finishedSpan.tags();
         Assert.assertEquals(2, tags.size());
-        Assert.assertEquals(corrId, tags.get(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME));
-        Assert.assertEquals(clientCorrId, tags.get(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME));
+        Assert.assertEquals(corrId, tags.get(Util.CORR_ID_FIELD_NAME));
+        Assert.assertEquals(clientCorrId, tags.get(Util.CLIENT_CORR_ID_FIELD_NAME));
     }
 }

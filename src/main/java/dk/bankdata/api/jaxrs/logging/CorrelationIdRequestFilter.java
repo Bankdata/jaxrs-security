@@ -24,10 +24,7 @@ public class CorrelationIdRequestFilter implements ContainerRequestFilter, Clien
     private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdRequestFilter.class);
 
     final String corrIdHeaderName;
-    static final String CORR_ID_FIELD_NAME = "correlationId";
-
     final String clientCorrIdHeaderName;
-    static final String CLIENT_CORR_ID_FIELD_NAME = "clientCorrelationId";
 
 
 
@@ -41,8 +38,8 @@ public class CorrelationIdRequestFilter implements ContainerRequestFilter, Clien
      */
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        propagateToMdc(requestContext, corrIdHeaderName, CORR_ID_FIELD_NAME, true);
-        propagateToMdc(requestContext, clientCorrIdHeaderName, CLIENT_CORR_ID_FIELD_NAME, false);
+        propagateToMdc(requestContext, corrIdHeaderName, Util.CORR_ID_FIELD_NAME, true);
+        propagateToMdc(requestContext, clientCorrIdHeaderName, Util.CLIENT_CORR_ID_FIELD_NAME, false);
     }
 
     /**
@@ -50,8 +47,8 @@ public class CorrelationIdRequestFilter implements ContainerRequestFilter, Clien
      */
     @Override
     public void filter(ClientRequestContext requestContext) {
-        propagateToHeader(requestContext, CORR_ID_FIELD_NAME, corrIdHeaderName);
-        propagateToHeader(requestContext, CLIENT_CORR_ID_FIELD_NAME, clientCorrIdHeaderName);
+        propagateToHeader(requestContext, Util.CORR_ID_FIELD_NAME, corrIdHeaderName);
+        propagateToHeader(requestContext, Util.CLIENT_CORR_ID_FIELD_NAME, clientCorrIdHeaderName);
     }
 
     private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey, boolean createIfMissing) {

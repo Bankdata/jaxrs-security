@@ -24,7 +24,7 @@ public class CorrelationIdResponseFilter implements ContainerResponseFilter {
      */
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-        MDC.remove(CorrelationIdRequestFilter.CORR_ID_FIELD_NAME);
-        MDC.remove(CorrelationIdRequestFilter.CLIENT_CORR_ID_FIELD_NAME);
+        MDC.remove(Util.CORR_ID_FIELD_NAME);
+        MDC.remove(Util.CLIENT_CORR_ID_FIELD_NAME);
     }
 }
