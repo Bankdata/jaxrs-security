@@ -65,7 +65,13 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
         MDC.remove(CLIENT_CORR_ID_FIELD_NAME);
     }
 
+    public static String getCorrelationId() {
+        return MDC.get(CORR_ID_FIELD_NAME);
+    }
 
+    public static String getClientCorrelationId() {
+        return MDC.get(CLIENT_CORR_ID_FIELD_NAME);
+    }
 
     private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey, boolean createIfMissing) {
         String headerValue = requestContext.getHeaderString(headerName);
