@@ -3,8 +3,6 @@ package dk.bankdata.api.jaxrs.logging;
 import java.util.regex.Pattern;
 
 class Util {
-    static final String CORR_ID_FIELD_NAME = "correlationId";
-    static final String CLIENT_CORR_ID_FIELD_NAME = "clientCorrelationId";
 
     private static final Pattern validUuidPattern =
             Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");

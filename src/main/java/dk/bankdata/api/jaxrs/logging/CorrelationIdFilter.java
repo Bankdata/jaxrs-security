@@ -9,6 +9,8 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +22,18 @@ import org.slf4j.MDC;
 
 @Provider
 @Priority(100)
-public class CorrelationIdRequestFilter implements ContainerRequestFilter, ClientRequestFilter {
-    private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdRequestFilter.class);
-
+public class CorrelationIdFilter implements ContainerRequestFilter, ContainerResponseFilter, ClientRequestFilter {
+    private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdFilter.class);
+    
     final String corrIdHeaderName;
+    static final String CORR_ID_FIELD_NAME = "correlationId";
+
     final String clientCorrIdHeaderName;
+    static final String CLIENT_CORR_ID_FIELD_NAME = "clientCorrelationId";
 
 
 
-    public CorrelationIdRequestFilter() {
+    public CorrelationIdFilter() {
         corrIdHeaderName = Util.loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
         clientCorrIdHeaderName = Util.loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
     }
@@ -38,8 +43,8 @@ public class CorrelationIdRequestFilter implements ContainerRequestFilter, Clien
      */
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        propagateToMdc(requestContext, corrIdHeaderName, Util.CORR_ID_FIELD_NAME, true);
-        propagateToMdc(requestContext, clientCorrIdHeaderName, Util.CLIENT_CORR_ID_FIELD_NAME, false);
+        propagateToMdc(requestContext, corrIdHeaderName, CORR_ID_FIELD_NAME, true);
+        propagateToMdc(requestContext, clientCorrIdHeaderName, CLIENT_CORR_ID_FIELD_NAME, false);
     }
 
     /**
@@ -47,9 +52,20 @@ public class CorrelationIdRequestFilter implements ContainerRequestFilter, Clien
      */
     @Override
     public void filter(ClientRequestContext requestContext) {
-        propagateToHeader(requestContext, Util.CORR_ID_FIELD_NAME, corrIdHeaderName);
-        propagateToHeader(requestContext, Util.CLIENT_CORR_ID_FIELD_NAME, clientCorrIdHeaderName);
+        propagateToHeader(requestContext, CORR_ID_FIELD_NAME, corrIdHeaderName);
+        propagateToHeader(requestContext, CLIENT_CORR_ID_FIELD_NAME, clientCorrIdHeaderName);
     }
+
+    /**
+     * Removes Correlation ID from MDC to prevent same-thread mix of data.
+     */
+    @Override
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
+        MDC.remove(CORR_ID_FIELD_NAME);
+        MDC.remove(CLIENT_CORR_ID_FIELD_NAME);
+    }
+
+
 
     private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey, boolean createIfMissing) {
         String headerValue = requestContext.getHeaderString(headerName);
