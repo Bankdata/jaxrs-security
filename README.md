@@ -183,8 +183,7 @@ public class RestApplication extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> providers = new HashSet<>(super.getClasses());
         
-        providers.add(CorrelationIdRequestFilter.class);
-        providers.add(CorrelationIdResponseFilter.class);
+        providers.add(CorrelationIdFilter.class);
 
         return providers;
     }
