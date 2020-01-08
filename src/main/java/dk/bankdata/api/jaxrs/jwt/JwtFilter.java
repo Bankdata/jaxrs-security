@@ -1,6 +1,6 @@
 package dk.bankdata.api.jaxrs.jwt;
 
-import dk.bankdata.api.types.ProblemDetails;
+import dk.bankdata.api.types.ErrorDetails;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -117,16 +117,16 @@ public class JwtFilter implements ContainerRequestFilter {
         String authorizationHeader = requestContext.getHeaderString("Authorization");
 
         if (authorizationHeader == null) {
-            ProblemDetails problemDetails = new ProblemDetails.Builder()
-                    .title("Unable to authenticate user")
+            ErrorDetails errorDetails = new ErrorDetails.Builder()
                     .status(Response.Status.UNAUTHORIZED.getStatusCode())
                     .detail("Jwt not found")
+                    .messageId("")
                     .build();
 
             Response response = Response
-                    .status(problemDetails.getStatus())
+                    .status(errorDetails.getStatus())
                     .type("application/problem+json")
-                    .entity(problemDetails)
+                    .entity(errorDetails)
                     .build();
 
             requestContext.abortWith(response);
@@ -146,6 +146,7 @@ public class JwtFilter implements ContainerRequestFilter {
 
             String jws = authorizationHeader.replace("Bearer ", "");
             JwtClaims jwtClaims = jwtConsumer.processToClaims(jws);
+
             JwtToken jwtToken = new JwtToken(jwtClaims, jws);
 
             storeJwtTokenInContainer(jwtToken);
@@ -153,8 +154,8 @@ public class JwtFilter implements ContainerRequestFilter {
         } catch (InvalidJwtException e) {
             LOG.error("Unable to authenticate user", e);
 
-            ProblemDetails.Builder builder = new ProblemDetails.Builder()
-                    .title("Error validating jwt");
+            ErrorDetails.Builder builder = new ErrorDetails.Builder()
+                    .messageId("");
 
             try {
                 if (e.hasExpired()) {
@@ -172,11 +173,11 @@ public class JwtFilter implements ContainerRequestFilter {
                 LOG.error("<LOG.FAILED> - Unable to authenticate user", e);
             }
 
-            ProblemDetails problemDetails = builder.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
+            ErrorDetails errorDetails = builder.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
 
-            Response response = Response.status(problemDetails.getStatus())
+            Response response = Response.status(errorDetails.getStatus())
                     .type("application/problem+json")
-                    .entity(problemDetails)
+                    .entity(errorDetails)
                     .build();
 
             requestContext.abortWith(response);

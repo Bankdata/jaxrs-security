@@ -168,3 +168,50 @@ public class Api {
     }
 }
 ```
+
+##### Correlation ID propagation
+
+This will add the two correlation ID headers (Client-generated and server-generated) into MDC as `clientCorrelationId` and  `correlationId` respectively and also propagate them into HTTP client calls.
+
+Correlation IDs must be UUID v4. If they are not, a warning will be logged and a UUID will be generated instead.
+
+As this is a @Provider it has to be added to your application 
+
+```
+public class RestApplication extends Application {
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> providers = new HashSet<>(super.getClasses());
+        
+        providers.add(CorrelationIdFilter.class);
+
+        return providers;
+    }
+}
+```
+
+Furthermore, the naming of the HTTP headers are defined by two environment variables:
+```
+CORR_ID_HEADER_NAME = Name of the header containing the server-generated correlation ID
+CLIENT_CORR_ID_HEADER_NAME = Name of the header containing the client-generated correlation ID
+```
+
+If the header containing the server-generated correlation ID is not present, the library will generate a UUID in its place.
+
+To output the Correlation IDs into your logs, you need to setup your logging configuration to output the MDC fields, e.g. for logback console output:
+```
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %X{correlationId} %X{clientCorrelationId} [%thread] %-5level %logger{36} aaa - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
+```
