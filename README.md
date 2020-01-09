@@ -83,7 +83,7 @@ public class RestApplication extends Application {
 
 This module can be used to obfuscate sensitive data, which is needed as path params or query params.
 
-The cipher key has to be 128 bit or 32 characters 
+The cipher key has to be 128 bit or 32 characters long.
 ```
    Encryption encryption = new Encryption("some-cipher-key");
    String encryptedSensitiveData = encryption.encrypt("sensitive-data");
