@@ -175,7 +175,7 @@ This will add the two correlation ID headers (Client-generated and server-genera
 
 Correlation IDs must be UUID v4. If they are not, a warning will be logged and a UUID will be generated instead.
 
-As this is a @Provider it has to be added to your application 
+As this is a @Provider it has to be added to your application to capture the Correlation IDs
 
 ```
 public class RestApplication extends Application {
@@ -189,6 +189,16 @@ public class RestApplication extends Application {
     }
 }
 ```
+
+Your client also needs to add it as a filter, e.g.
+
+```
+        ClientBuilder.newBuilder()
+               ...
+                .register(new CorrelationIdFilter())
+               ...
+```
+
 
 Furthermore, the naming of the HTTP headers are defined by two environment variables:
 ```
