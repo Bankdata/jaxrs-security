@@ -69,7 +69,10 @@ public class OidcKeyResolver implements VerificationKeyResolver {
             key = verificationJwkSelector.select(jws, jwks.getJsonWebKeys());
 
         } catch (InvalidJwtException | MalformedClaimException | JoseException | IOException e) {
-            throw new UnresolvableKeyException("Unable to resolve key", e);
+            String details = e.getMessage() + "." +
+                    (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
+
+            throw new UnresolvableKeyException("Unable to resolve key. Error was " + details);
         }
 
         if (key == null) {
@@ -97,7 +100,10 @@ public class OidcKeyResolver implements VerificationKeyResolver {
             return keySet;
 
         } catch (Exception e) {
-            throw new UnresolvableKeyException("Error finding jwks_uri", e);
+            String details = e.getMessage() + "." +
+                    (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
+
+            throw new UnresolvableKeyException("Error finding jwks_uri. Error was " + details);
         }
     }
 
@@ -138,7 +144,7 @@ public class OidcKeyResolver implements VerificationKeyResolver {
             if (span != null) {
                 span.setTag("error", true);
             }
-            throw new UnresolvableKeyException(sb.toString(), e);
+            throw new UnresolvableKeyException("Error getting well-known. Error was " + sb.toString());
         } finally {
             if (span != null) {
                 span.finish();
