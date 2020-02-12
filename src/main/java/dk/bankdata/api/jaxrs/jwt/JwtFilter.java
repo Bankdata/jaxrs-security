@@ -152,10 +152,8 @@ public class JwtFilter implements ContainerRequestFilter {
             storeJwtTokenInContainer(jwtToken);
             requestContext.setProperty(JWT_ATTRIBUTE, jwtToken);
         } catch (InvalidJwtException e) {
-            LOG.error("Unable to authenticate user", e);
-
             ErrorDetails.Builder builder = new ErrorDetails.Builder()
-                    .messageId("");
+                    .messageId("Unable to authenticate user");
 
             try {
                 if (e.hasExpired()) {
@@ -170,10 +168,12 @@ public class JwtFilter implements ContainerRequestFilter {
                     builder.detail("Jwt validation error");
                 }
             } catch (Exception finalException) {
-                LOG.error("<LOG.FAILED> - Unable to authenticate user", e);
+                LOG.error("<LOG.FAILED> - Unable to build details for logging.");
             }
 
             ErrorDetails errorDetails = builder.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
+
+            LOG.error("Unable to authenticate user. Error = " + errorDetails.getDetail());
 
             Response response = Response.status(errorDetails.getStatus())
                     .type("application/problem+json")
