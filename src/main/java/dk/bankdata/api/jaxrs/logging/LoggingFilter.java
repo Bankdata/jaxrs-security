@@ -92,7 +92,10 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
                 MDC.put(KEY_SUBJECT, jwtSubject);
 
             } catch (InvalidJwtException | MalformedClaimException e) {
-                LOG.error("LoggingFilter failed with message {} ", e.getMessage());
+                String details = e.getMessage() + "." +
+                        (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
+
+                LOG.error("LoggingFilter failed with message {} ", details);
             }
         }
     }
@@ -105,28 +108,15 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         int httpStatus = responseContext.getStatus();
         MDC.put(KEY_HTTP_STATUS, String.valueOf(httpStatus));
 
-        String requestEntity = (String) requestContext.getProperty("request-entity");
-        String responseEntity = truncate(getResponseEntity(responseContext));
         String method = requestContext.getMethod();
         String path = requestContext.getUriInfo().getPath();
 
-        LOG.debug("method={}, path={}, request={}, status={}, time={} ms, response={}",
-                method, path, requestEntity, httpStatus, executionTime, responseEntity);
+        LOG.info("method={}, path={}, status={}, time={} ms",
+                method, path, httpStatus, executionTime);
 
         MDC.remove(KEY_SUBJECT);
         MDC.remove(KEY_EXECUTION_TIME);
         MDC.remove(KEY_HTTP_STATUS);
-    }
-
-    private String getResponseEntity(ContainerResponseContext responseContext) {
-        String responseEntity = "";
-
-        if (responseContext.hasEntity()) {
-            Object entity = responseContext.getEntity();
-            responseEntity = entity.toString();
-        }
-
-        return responseEntity;
     }
 
     private long getExecutionTime(ContainerRequestContext requestContext) {
@@ -148,7 +138,10 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
                 outputStream.write(b);
             }
         } catch (IOException e) {
-            LOG.error("Unable to read request entity", e);
+            String details = e.getMessage() + "." +
+                    (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
+
+            LOG.error("Unable to read request entity. Error was " + details);
         }
 
         return outputStream.toByteArray();
