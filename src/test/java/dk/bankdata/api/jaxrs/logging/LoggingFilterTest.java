@@ -28,7 +28,6 @@ public class LoggingFilterTest {
                 "mXNrmCYrACG05NsME8bFE2MZgzjpo1xHA";
 
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
-        when(containerRequestContext.hasEntity()).thenReturn(false);
         when(containerRequestContext.getHeaderString("Authorization")).thenReturn(jwt);
 
         loggingFilter.filter(containerRequestContext);

@@ -155,6 +155,8 @@ public class JwtFilter implements ContainerRequestFilter {
             ErrorDetails.Builder builder = new ErrorDetails.Builder()
                     .messageId("Unable to authenticate user");
 
+            String defaultDetails = e.getCause() != null ?  e.getCause().getMessage() : "";
+
             try {
                 if (e.hasExpired()) {
                     builder.detail("JWT expired at " + e.getJwtContext().getJwtClaims().getExpirationTime());
@@ -165,7 +167,7 @@ public class JwtFilter implements ContainerRequestFilter {
                 } else if (e.hasErrorCode(ErrorCodes.SIGNATURE_INVALID)) {
                     builder.detail("Invalid signature!");
                 } else {
-                    builder.detail("Jwt validation error");
+                    builder.detail("Jwt validation error. Cause was " + defaultDetails);
                 }
             } catch (Exception finalException) {
                 LOG.error("<LOG.FAILED> - Unable to build details for logging.");

@@ -1,7 +1,6 @@
 package dk.bankdata.api.jaxrs.logging;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +11,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
+
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -52,7 +52,7 @@ import org.slf4j.MDC;
  */
 @LogEnabled
 @Provider
-@Priority(Priorities.USER - 99)
+@Priority(Priorities.AUTHENTICATION - 1)
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
@@ -64,15 +64,6 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     public void filter(ContainerRequestContext requestContext) {
         requestContext.setProperty("request-timer", System.currentTimeMillis());
 
-        String entity = "";
-
-        if (requestContext.hasEntity()) {
-            byte[] entityData = toByteArray(requestContext.getEntityStream());
-            requestContext.setEntityStream(new ByteArrayInputStream(entityData));
-            entity = truncate(entity);
-        }
-
-        requestContext.setProperty("request-entity", entity);
         String jwt = requestContext.getHeaderString("Authorization");
 
         if (jwt != null) {
@@ -88,6 +79,11 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
                 JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
 
                 String jwtSubject = jwtClaims.getSubject();
+
+                if (jwtClaims.hasClaim("bankno")) {
+                    String bankno = jwtClaims.getClaimValue("bankno").toString();
+                    requestContext.setProperty("bankno", bankno);
+                }
 
                 MDC.put(KEY_SUBJECT, jwtSubject);
 
@@ -110,9 +106,10 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         String method = requestContext.getMethod();
         String path = requestContext.getUriInfo().getPath();
+        String bannkNo = (String) requestContext.getProperty("bankno");
 
-        LOG.info("method={}, path={}, status={}, time={} ms",
-                method, path, httpStatus, executionTime);
+        LOG.info("method={}, path={}, bankno={}, status={}, time={} ms",
+                method, path, bannkNo, httpStatus, executionTime);
 
         MDC.remove(KEY_SUBJECT);
         MDC.remove(KEY_EXECUTION_TIME);
