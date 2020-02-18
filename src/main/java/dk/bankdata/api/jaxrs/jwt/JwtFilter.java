@@ -154,7 +154,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .setRequireSubject()
                     .setExpectedAudience(approvedAudiences.toArray(new String[0]))
                     .setExpectedIssuers(true, approvedIssuers.toArray(new String[0]))
-                    .setVerificationKeyResolver(keyResolver)
+                    .setVerificationKeyResolver(okr)
                     .build();
 
             String jws = authorizationHeader.replace("Bearer ", "");
