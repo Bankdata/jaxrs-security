@@ -108,13 +108,14 @@ public class RestApplication extends Application {
     List<String> audiences = Arrays.asList("some-audience");
     List<String> issuers = Arrays.asList("some-issuer-1", "some-issuer-3", "some-issuer-3");
     URI proxy = URI.create("http://some-proxy.domain.dk"); // This is optional
+    List<String> proxyExceptions = Arrays.asList("some.dmz.com", "some-other.url.org"); // This is optional
     
     @Override
     public Set<Object> getSingletons() {
         
         Set<Object> singletons = new HashSet<Object>();
         
-        singletons.add(new JwtFilter(audiences, issuers, proxy));
+        singletons.add(new JwtFilter(audiences, issuers, proxy, proxyExceptions));
         
         return singletons;
     }
