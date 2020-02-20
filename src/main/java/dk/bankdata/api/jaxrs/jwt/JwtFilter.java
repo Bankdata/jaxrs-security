@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.util.List;
-
 import javax.annotation.Priority;
 import javax.annotation.security.PermitAll;
 import javax.enterprise.context.spi.CreationalContext;
@@ -25,6 +24,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.ErrorCodes;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
@@ -87,17 +87,28 @@ public class JwtFilter implements ContainerRequestFilter {
     private final List<String> approvedAudiences;
     private final List<String> approvedIssuers;
     private final OidcKeyResolver keyResolver;
+    private final OidcKeyResolver proxiedKeyResolver;
+    private final List<String> proxyExceptions;
 
     public JwtFilter(@NotNull List<String> approvedAudiences, @NotNull List<String> approvedIssuers, URI proxy) {
+        this(approvedAudiences, approvedIssuers, proxy, null);
+    }
+
+    public JwtFilter(@NotNull List<String> approvedAudiences, @NotNull List<String> approvedIssuers,
+                     URI proxy, List<String> proxyExceptions) {
+
         this.approvedAudiences = approvedAudiences;
         this.approvedIssuers = approvedIssuers;
+        this.keyResolver = new OidcKeyResolver(approvedIssuers.toArray(new String[0]));
+
         if (proxy == null) {
-            this.keyResolver = new OidcKeyResolver(approvedIssuers.toArray(new String[0]));
+            this.proxiedKeyResolver = null;
         } else {
-            this.keyResolver = new OidcKeyResolver(
+            this.proxiedKeyResolver = new OidcKeyResolver(
                     new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort())),
                     approvedIssuers.toArray(new String[0]));
         }
+        this.proxyExceptions = proxyExceptions;
     }
 
     @Override
@@ -134,6 +145,8 @@ public class JwtFilter implements ContainerRequestFilter {
         }
 
         try {
+            OidcKeyResolver okr = getOidcKeyResolver(authorizationHeader);
+
             JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                     .setRequireExpirationTime()
                     .setAllowedClockSkewInSeconds(30)
@@ -141,7 +154,7 @@ public class JwtFilter implements ContainerRequestFilter {
                     .setRequireSubject()
                     .setExpectedAudience(approvedAudiences.toArray(new String[0]))
                     .setExpectedIssuers(true, approvedIssuers.toArray(new String[0]))
-                    .setVerificationKeyResolver(keyResolver)
+                    .setVerificationKeyResolver(okr)
                     .build();
 
             String jws = authorizationHeader.replace("Bearer ", "");
@@ -183,7 +196,49 @@ public class JwtFilter implements ContainerRequestFilter {
                     .build();
 
             requestContext.abortWith(response);
+        } catch (MalformedClaimException e) {
+            String defaultDetails = e.getCause() != null ?  e.getCause().getMessage() : "";
+
+            ErrorDetails errorDetails = new ErrorDetails.Builder()
+                    .messageId("Unable to authenticate user")
+                    .detail(defaultDetails)
+                    .status(Response.Status.UNAUTHORIZED.getStatusCode())
+                    .build();
+
+            LOG.error("Unable to authenticate user. MalformedClaimException. Error = " + errorDetails.getDetail());
+
+            Response response = Response.status(errorDetails.getStatus())
+                    .type("application/problem+json")
+                    .entity(errorDetails)
+                    .build();
+
+            requestContext.abortWith(response);
         }
+    }
+
+    private OidcKeyResolver getOidcKeyResolver(String jwt) throws InvalidJwtException, MalformedClaimException {
+        if (proxiedKeyResolver == null) {
+            return keyResolver;
+        } else if (proxyExceptions == null) {
+            return  proxiedKeyResolver;
+        }
+
+        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                .setSkipAllValidators()
+                .setSkipSignatureVerification()
+                .setSkipVerificationKeyResolutionOnNone()
+                .build();
+
+        String pureJwt = jwt.replace("Bearer ", "");
+
+        JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
+        String issuer = jwtClaims.getIssuer();
+
+        return issuerOnExceptionList(issuer) ? keyResolver : proxiedKeyResolver;
+    }
+
+    private boolean issuerOnExceptionList(String issuer) {
+        return proxyExceptions.stream().anyMatch(issuer::contains);
     }
 
     @SuppressWarnings("unchecked")
