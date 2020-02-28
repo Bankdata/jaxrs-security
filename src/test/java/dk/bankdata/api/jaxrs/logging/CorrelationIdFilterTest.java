@@ -1,5 +1,7 @@
 package dk.bankdata.api.jaxrs.logging;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -21,12 +23,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CorrelationIdFilterTest {
-    @InjectMocks
+    @InjectMocks @Spy
     CorrelationIdFilter correlationIdFilter;
 
     @After
@@ -45,6 +48,8 @@ public class CorrelationIdFilterTest {
         when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
         when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
 
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
+
         //Act
         correlationIdFilter.filter(containerRequestContext);
 
@@ -62,6 +67,9 @@ public class CorrelationIdFilterTest {
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
         when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
+
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
+
         correlationIdFilter.filter(containerRequestContext);
 
         MultivaluedMap<String, Object> headers = mock(MultivaluedMap.class);
@@ -80,6 +88,7 @@ public class CorrelationIdFilterTest {
     public void shouldNotPutClientCorrelationIdToMdcWhenNotPresentInHeader() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
 
         //Act
         correlationIdFilter.filter(containerRequestContext);
@@ -92,6 +101,8 @@ public class CorrelationIdFilterTest {
     public void shouldPutNewCorrelationIdToMdcWhenNotPresentInHeader() {
         //Arrange
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
 
         //Act
         correlationIdFilter.filter(containerRequestContext);
@@ -140,6 +151,7 @@ public class CorrelationIdFilterTest {
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
         when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
 
         //Act
         correlationIdFilter.filter(containerRequestContext);
@@ -161,6 +173,7 @@ public class CorrelationIdFilterTest {
         MockTracer tracer = new MockTracer();
         GlobalTracer.register(tracer);
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
 
         //Act
         correlationIdFilter.filter(containerRequestContext);
@@ -179,6 +192,7 @@ public class CorrelationIdFilterTest {
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         when(containerRequestContext.getHeaderString(correlationIdFilter.corrIdHeaderName)).thenReturn(corrId);
         when(containerRequestContext.getHeaderString(correlationIdFilter.clientCorrIdHeaderName)).thenReturn(clientCorrId);
+        doNothing().when(correlationIdFilter).storeLoggingHelperInContainer(any());
 
         MockTracer tracer = new MockTracer();
         GlobalTracer.register(tracer);

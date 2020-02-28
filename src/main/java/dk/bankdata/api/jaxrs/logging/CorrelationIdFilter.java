@@ -5,6 +5,10 @@ import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
 import java.util.UUID;
 import javax.annotation.Priority;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.CDI;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -43,8 +47,17 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
      */
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        propagateToMdc(requestContext, corrIdHeaderName, CORR_ID_FIELD_NAME, true);
-        propagateToMdc(requestContext, clientCorrIdHeaderName, CLIENT_CORR_ID_FIELD_NAME, false);
+        String corrId = propagateToMdcAndReturnHeader(requestContext,
+                corrIdHeaderName, CORR_ID_FIELD_NAME, true);
+
+        String clientCorrId = propagateToMdcAndReturnHeader(requestContext,
+                clientCorrIdHeaderName, CLIENT_CORR_ID_FIELD_NAME, false);
+
+        LoggingHelper loggingHelper = new LoggingHelper();
+        loggingHelper.setEntry(CORR_ID_FIELD_NAME, corrId);
+        loggingHelper.setEntry(CLIENT_CORR_ID_FIELD_NAME, clientCorrId);
+
+        storeLoggingHelperInContainer(loggingHelper);
     }
 
     /**
@@ -73,7 +86,9 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
         return MDC.get(CLIENT_CORR_ID_FIELD_NAME);
     }
 
-    private void propagateToMdc(ContainerRequestContext requestContext, String headerName, String mdcKey, boolean createIfMissing) {
+    private String propagateToMdcAndReturnHeader(ContainerRequestContext requestContext, String headerName,
+                                                 String mdcKey, boolean createIfMissing) {
+
         String headerValue = requestContext.getHeaderString(headerName);
         if (headerValue != null) {
             if (!Util.isValidUuid(headerValue)) {
@@ -87,6 +102,8 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
             MDC.put(mdcKey, headerValue);
             addTagToActiveSpan(mdcKey, headerValue);
         }
+
+        return headerValue;
     }
 
     private void propagateToHeader(ClientRequestContext requestContext, String mdcKey, String headerName) {
@@ -106,5 +123,14 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
         }
     }
 
+    protected void storeLoggingHelperInContainer(LoggingHelper loggingHelper) {
+        BeanManager bm = CDI.current().getBeanManager();
+        Bean<LoggingHelperContainer> bean =
+                (Bean<LoggingHelperContainer>) bm.getBeans(LoggingHelperContainer.class).iterator().next();
+        CreationalContext<LoggingHelperContainer> ctx = bm.createCreationalContext(bean);
+        LoggingHelperContainer container = (LoggingHelperContainer) bm.getReference(bean,
+                LoggingHelperContainer.class, ctx);
 
+        container.setLoggingHelper(loggingHelper);
+    }
 }
