@@ -5,15 +5,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Priority;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
 
 import org.jose4j.jwt.JwtClaims;
-import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
@@ -56,42 +58,42 @@ import org.slf4j.MDC;
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
-    private static final String KEY_SUBJECT = "subject";
     private static final String KEY_EXECUTION_TIME = "Execution-Time";
     private static final String KEY_HTTP_STATUS = "http-status";
+
+    @Context
+    private ResourceInfo resourceInfo;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
         requestContext.setProperty("request-timer", System.currentTimeMillis());
 
-        String jwt = requestContext.getHeaderString("Authorization");
+        if (!resourceInfo.getResourceMethod().isAnnotationPresent(PermitAll.class)) {
+            String jwt = requestContext.getHeaderString("Authorization");
 
-        if (jwt != null) {
-            try {
-                String pureJwt = jwt.replace("Bearer ", "");
+            if (jwt != null) {
+                try {
+                    String pureJwt = jwt.replace("Bearer ", "");
 
-                JwtConsumer jwtConsumer = new JwtConsumerBuilder()
-                        .setSkipAllValidators()
-                        .setSkipSignatureVerification()
-                        .setSkipVerificationKeyResolutionOnNone()
-                        .build();
+                    JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                            .setSkipAllValidators()
+                            .setSkipSignatureVerification()
+                            .setSkipVerificationKeyResolutionOnNone()
+                            .build();
 
-                JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
+                    JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
 
-                String jwtSubject = jwtClaims.getSubject();
+                    if (jwtClaims.hasClaim("bankno")) {
+                        String bankno = jwtClaims.getClaimValue("bankno").toString();
+                        requestContext.setProperty("bankno", bankno);
+                    }
 
-                if (jwtClaims.hasClaim("bankno")) {
-                    String bankno = jwtClaims.getClaimValue("bankno").toString();
-                    requestContext.setProperty("bankno", bankno);
+                } catch (InvalidJwtException e) {
+                    String details = e.getMessage() + "." +
+                            (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
+
+                    LOG.error("LoggingFilter failed with message {} ", details);
                 }
-
-                MDC.put(KEY_SUBJECT, jwtSubject);
-
-            } catch (InvalidJwtException | MalformedClaimException e) {
-                String details = e.getMessage() + "." +
-                        (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
-
-                LOG.error("LoggingFilter failed with message {} ", details);
             }
         }
     }
@@ -106,12 +108,19 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         String method = requestContext.getMethod();
         String path = requestContext.getUriInfo().getPath();
-        String bannkNo = (String) requestContext.getProperty("bankno");
+        String bankNo = (String) requestContext.getProperty("bankno");
 
-        LOG.info("method={}, path={}, bankno={}, status={}, time={} ms",
-                method, path, bannkNo, httpStatus, executionTime);
+        if (httpStatus >= 500) {
+            LOG.error("method={}, path={}, bankno={}, status={}, time={} ms",
+                    method, path, bankNo, httpStatus, executionTime);
+        } else if (httpStatus >= 400) {
+            LOG.warn("method={}, path={}, bankno={}, status={}, time={} ms",
+                    method, path, bankNo, httpStatus, executionTime);
+        } else {
+            LOG.debug("method={}, path={}, bankno={}, status={}, time={} ms",
+                    method, path, bankNo, httpStatus, executionTime);
+        }
 
-        MDC.remove(KEY_SUBJECT);
         MDC.remove(KEY_EXECUTION_TIME);
         MDC.remove(KEY_HTTP_STATUS);
     }
