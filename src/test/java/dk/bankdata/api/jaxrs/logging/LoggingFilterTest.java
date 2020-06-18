@@ -3,18 +3,26 @@ package dk.bankdata.api.jaxrs.logging;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ResourceInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoggingFilterTest {
-    @InjectMocks LoggingFilter loggingFilter;
+    @InjectMocks
+    private LoggingFilter loggingFilter;
+
+    @Mock
+    private ResourceInfo resourceInfo;
 
     @Test
-    public void shouldNotValidateJwt() {
+    public void shouldParseJwt() throws Exception {
         String jwt = "eyJraWQiOiItNjc2ODc3MTk0IiwieDV0IjoiZl82LU4tVDFRSWh2YjRwckgyWF96S2pGZFRjIiwiYWxnIjoiUlMyNTY" +
                 "ifQ.eyJiYW5rbm8iOjUxLCJjcHIiOiIzMTEyNjEwNzE0IiwiY3VzdG9tZXJOdW1iZXIiOiI1MDEzNjgiLCJ0cHAiOmZhbHNl" +
                 "LCJ1c2VyTnVtYmVyIjoiVFJIIiwianRpIjoiNzg0YTk1YjItMDJiMC00NmE5LTk4MzktYjQyNmExZGZiMzEyIiwiZGVsZWdh" +
@@ -30,6 +38,27 @@ public class LoggingFilterTest {
         ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
         when(containerRequestContext.getHeaderString("Authorization")).thenReturn(jwt);
 
+        Method method = MockClass.class.getDeclaredMethod("someTestFunction");
+        when(resourceInfo.getResourceMethod()).thenReturn(method);
+
         loggingFilter.filter(containerRequestContext);
+
+    }
+
+    @Test
+    public void shouldNotValidateJwt() throws Exception {
+        ContainerRequestContext containerRequestContext = mock(ContainerRequestContext.class);
+
+        Method method = MockClass.class.getDeclaredMethod("someFunction");
+        when(resourceInfo.getResourceMethod()).thenReturn(method);
+
+        loggingFilter.filter(containerRequestContext);
+    }
+
+    private static class MockClass {
+        @PermitAll()
+        public void someFunction() {}
+
+        public void someTestFunction() {}
     }
 }
