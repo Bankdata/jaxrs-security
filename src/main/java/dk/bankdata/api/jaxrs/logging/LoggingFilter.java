@@ -56,7 +56,6 @@ import org.slf4j.MDC;
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
-    private static final String KEY_SUBJECT = "subject";
     private static final String KEY_EXECUTION_TIME = "Execution-Time";
     private static final String KEY_HTTP_STATUS = "http-status";
 
@@ -66,7 +65,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         String jwt = requestContext.getHeaderString("Authorization");
 
-        if (jwt != null) {
+        if (jwt != null && (jwt.length() - jwt.replace(".", "").length() == 2)) {
             try {
                 String pureJwt = jwt.replace("Bearer ", "");
 
@@ -78,16 +77,12 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
                 JwtClaims jwtClaims = jwtConsumer.processToClaims(pureJwt);
 
-                String jwtSubject = jwtClaims.getSubject();
-
                 if (jwtClaims.hasClaim("bankno")) {
                     String bankno = jwtClaims.getClaimValue("bankno").toString();
                     requestContext.setProperty("bankno", bankno);
                 }
 
-                MDC.put(KEY_SUBJECT, jwtSubject);
-
-            } catch (InvalidJwtException | MalformedClaimException e) {
+            } catch (InvalidJwtException e) {
                 String details = e.getMessage() + "." +
                         (e.getCause() != null ?  " Cause : " + e.getCause().getMessage() : "");
 
@@ -106,12 +101,19 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         String method = requestContext.getMethod();
         String path = requestContext.getUriInfo().getPath();
-        String bannkNo = (String) requestContext.getProperty("bankno");
+        String bankNo = (String) requestContext.getProperty("bankno");
 
-        LOG.info("method={}, path={}, bankno={}, status={}, time={} ms",
-                method, path, bannkNo, httpStatus, executionTime);
+        if (httpStatus >= 500) {
+            LOG.error("method={}, path={}, bankno={}, status={}, time={} ms",
+                    method, path, bankNo, httpStatus, executionTime);
+        } else if (httpStatus >= 400) {
+            LOG.warn("method={}, path={}, bankno={}, status={}, time={} ms",
+                    method, path, bankNo, httpStatus, executionTime);
+        } else {
+            LOG.debug("method={}, path={}, bankno={}, status={}, time={} ms",
+                    method, path, bankNo, httpStatus, executionTime);
+        }
 
-        MDC.remove(KEY_SUBJECT);
         MDC.remove(KEY_EXECUTION_TIME);
         MDC.remove(KEY_HTTP_STATUS);
     }
