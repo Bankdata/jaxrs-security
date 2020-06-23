@@ -110,7 +110,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         String path = requestContext.getUriInfo().getPath();
         String bankNo = (String) requestContext.getProperty("bankno");
 
-        if (httpStatus <= 400) {
+        if (httpStatus < 400) {
             LOG.debug("method={}, path={}, bankno={}, status={}, time={} ms",
                     method, path, bankNo, httpStatus, executionTime);
         } else if (httpStatus >= 500) {
