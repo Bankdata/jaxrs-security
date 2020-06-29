@@ -8,10 +8,14 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 @Priority(Priorities.HEADER_DECORATOR)
 public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRequestFilter {
+    private static final Logger LOG = LoggerFactory.getLogger(HeaderPropagationFilter.class);
+
     private List<String> headers;
 
     public HeaderPropagationFilter(List<String> headers) {
@@ -20,14 +24,27 @@ public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRe
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        headers.forEach(header -> requestContext.setProperty(header, requestContext.getHeaderString(header)));
+
+        headers.forEach(header -> {
+            String headerValue = requestContext.getHeaderString(header);
+
+            if (headerValue == null) {
+                LOG.warn("Header " + header + " not found in ContainerRequestContext");
+            } else {
+                requestContext.setProperty(header, headerValue);
+            }
+        });
     }
 
     @Override
     public void filter(ClientRequestContext requestContext) {
         headers.forEach(header -> {
-            String headerValue = String.valueOf(requestContext.getProperty(header));
-            requestContext.getHeaders().putSingle(header, headerValue);
+            Object property = requestContext.getProperty(header);
+
+            if (property != null) {
+                String headerValue = String.valueOf(property);
+                requestContext.getHeaders().putSingle(header, headerValue);
+            }
         });
     }
 }
