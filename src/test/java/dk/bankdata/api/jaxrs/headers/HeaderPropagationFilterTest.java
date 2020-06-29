@@ -69,4 +69,5 @@ public class HeaderPropagationFilterTest {
         verify(clientContext.getHeaders()).putSingle("some-header-1", "some-value-1");
         verify(clientContext.getHeaders()).putSingle("some-header-2", "some-value-2");
     }
+
 }
