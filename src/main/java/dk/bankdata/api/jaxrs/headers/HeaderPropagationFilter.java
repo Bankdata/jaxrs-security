@@ -1,25 +1,30 @@
 package dk.bankdata.api.jaxrs.headers;
 
+import dk.bankdata.api.jaxrs.utils.EnvironmentReader;
+import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Provider
-@Priority(Priorities.HEADER_DECORATOR)
+@ApplicationScoped
 public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRequestFilter {
+    @Context
+    private ContainerRequestContext containerRequestContext;
+
     private static final Logger LOG = LoggerFactory.getLogger(HeaderPropagationFilter.class);
+    private final List<String> headers;
 
-    private List<String> headers;
-
-    public HeaderPropagationFilter(List<String> headers) {
-        this.headers = headers;
+    public HeaderPropagationFilter() {
+        String envHeaders = EnvironmentReader.loadSystemEnvironmentVariable("HEADER_FORWARDING");
+        headers = Arrays.asList(envHeaders.split(","));
     }
 
     @Override
@@ -39,7 +44,7 @@ public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRe
     @Override
     public void filter(ClientRequestContext requestContext) {
         headers.forEach(header -> {
-            Object property = requestContext.getProperty(header);
+            Object property = containerRequestContext.getProperty(header);
 
             if (property != null) {
                 String headerValue = String.valueOf(property);

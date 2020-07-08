@@ -110,7 +110,7 @@ public class CorrelationIdFilterTest {
         //Assert
         String guid = MDC.get(CorrelationIdFilter.CORR_ID_FIELD_NAME);
         Assert.assertNotNull(guid);
-        Assert.assertTrue(Util.isValidUuid(guid));
+        Assert.assertTrue(correlationIdFilter.isValidUuid(guid));
     }
 
     @Test
@@ -161,10 +161,10 @@ public class CorrelationIdFilterTest {
         String forwardedClientCorrId = MDC.get(CorrelationIdFilter.CLIENT_CORR_ID_FIELD_NAME);
 
         Assert.assertNotEquals(corrId, forwardedCorrId);
-        Assert.assertTrue(Util.isValidUuid(forwardedCorrId));
+        Assert.assertTrue(correlationIdFilter.isValidUuid(forwardedCorrId));
 
         Assert.assertNotEquals(clientCorrId, forwardedClientCorrId);
-        Assert.assertTrue(Util.isValidUuid(forwardedClientCorrId));
+        Assert.assertTrue(correlationIdFilter.isValidUuid(forwardedClientCorrId));
     }
 
     @Test
