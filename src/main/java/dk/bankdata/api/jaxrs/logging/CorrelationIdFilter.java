@@ -1,9 +1,11 @@
 package dk.bankdata.api.jaxrs.logging;
 
+import dk.bankdata.api.jaxrs.utils.EnvironmentReader;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import javax.annotation.Priority;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -28,18 +30,19 @@ import org.slf4j.MDC;
 @Priority(100)
 public class CorrelationIdFilter implements ContainerRequestFilter, ContainerResponseFilter, ClientRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(CorrelationIdFilter.class);
-    
+
+    private static final Pattern validUuidPattern =
+        Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+
     final String corrIdHeaderName;
     static final String CORR_ID_FIELD_NAME = "correlationId";
 
     final String clientCorrIdHeaderName;
     static final String CLIENT_CORR_ID_FIELD_NAME = "clientCorrelationId";
 
-
-
     public CorrelationIdFilter() {
-        corrIdHeaderName = Util.loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
-        clientCorrIdHeaderName = Util.loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
+        corrIdHeaderName = EnvironmentReader.loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
+        clientCorrIdHeaderName = EnvironmentReader.loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
     }
 
     /**
@@ -91,7 +94,7 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
 
         String headerValue = requestContext.getHeaderString(headerName);
         if (headerValue != null) {
-            if (!Util.isValidUuid(headerValue)) {
+            if (!isValidUuid(headerValue)) {
                 headerValue = UUID.randomUUID().toString();
                 LOG.warn("Header '{}' contained non-UUID value, generated new value '{}'", headerName, headerValue);
             }
@@ -132,5 +135,9 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
                 LoggingHelperContainer.class, ctx);
 
         container.setLoggingHelper(loggingHelper);
+    }
+
+    protected boolean isValidUuid(String uuid) {
+        return validUuidPattern.matcher(uuid).matches();
     }
 }
