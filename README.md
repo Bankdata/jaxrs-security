@@ -172,7 +172,11 @@ public class Api {
 
 ##### Header forwarding (Header Propagation)
 This is an easy why to forward headers in the request to any client requests executed.
-THis is a @Provider and thus need to be added to the application.
+This is a @Provider and thus need to be added to the application.
+
+NOTE: This filter requires an environment variable to be set called HEADER_FORWARDING.
+The value should be a list of headers seperated by a , 
+example 'someHeader,SomeOtherHeader'
 
 ```java
 public class RestApplication extends Application {
