@@ -170,6 +170,45 @@ public class Api {
 }
 ```
 
+##### Header forwarding (Header Propagation)
+This is an easy why to forward headers in the request to any client requests executed.
+THis is a @Provider and thus need to be added to the application.
+
+```java
+public class RestApplication extends Application {
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> providers = new HashSet<>(super.getClasses());
+        
+        providers.add(HeaderPropagationFilter.class);
+
+        return providers;
+    }
+}
+```
+
+The client instance also need to register this filter like this
+
+```java
+@ApplicationScoped
+public class ClientProducer {
+    @Produces    
+    public Client produceClient(JwtClientFilter jwtClientFilter, HeaderPropagationFilter headerPropagationFilter) {
+        ObjectMapper objectMapper = createObjectMapper();
+ 
+        return ClientBuilder.newBuilder()
+                .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+                .register(new JacksonJsonProvider(objectMapper))
+                .register(jwtClientFilter)
+                .register(new JaxrsClientFilter())
+                .register(new CorrelationIdFilter())
+                .register(headerPropagationFilter)
+                .build();
+    }
+}    
+```
+
 ##### Correlation ID propagation
 
 This will add the two correlation ID headers (Client-generated and server-generated) into MDC as `clientCorrelationId` and  `correlationId` respectively and also propagate them into HTTP client calls.
@@ -178,7 +217,7 @@ Correlation IDs must be UUID v4. If they are not, a warning will be logged and a
 
 As this is a @Provider it has to be added to your application to capture the Correlation IDs
 
-```
+```java
 public class RestApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
