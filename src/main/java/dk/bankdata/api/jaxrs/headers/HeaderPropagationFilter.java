@@ -3,6 +3,7 @@ package dk.bankdata.api.jaxrs.headers;
 import dk.bankdata.api.jaxrs.utils.EnvironmentReader;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -20,9 +21,10 @@ public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRe
     private ContainerRequestContext containerRequestContext;
 
     private static final Logger LOG = LoggerFactory.getLogger(HeaderPropagationFilter.class);
-    private final List<String> headers;
+    private List<String> headers;
 
-    public HeaderPropagationFilter() {
+    @PostConstruct
+    public void initialize() {
         String envHeaders = EnvironmentReader.loadSystemEnvironmentVariable("HEADER_FORWARDING");
         headers = Arrays.asList(envHeaders.split(","));
     }
