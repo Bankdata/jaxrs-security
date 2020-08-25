@@ -1,6 +1,5 @@
 package dk.bankdata.api.jaxrs.logging;
 
-import dk.bankdata.api.jaxrs.utils.EnvironmentReader;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
@@ -41,8 +40,8 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
     static final String CLIENT_CORR_ID_FIELD_NAME = "clientCorrelationId";
 
     public CorrelationIdFilter() {
-        corrIdHeaderName = EnvironmentReader.loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
-        clientCorrIdHeaderName = EnvironmentReader.loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
+        corrIdHeaderName = loadSystemEnvironmentVariable("CORR_ID_HEADER_NAME");
+        clientCorrIdHeaderName = loadSystemEnvironmentVariable("CLIENT_CORR_ID_HEADER_NAME");
     }
 
     /**
@@ -139,5 +138,15 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
 
     protected boolean isValidUuid(String uuid) {
         return validUuidPattern.matcher(uuid).matches();
+    }
+
+    protected String loadSystemEnvironmentVariable(String variableName) {
+        String value = System.getenv(variableName);
+
+        if (value == null || value.isEmpty()) {
+            throw new RuntimeException("Expected environment variable: " + variableName);
+        }
+
+        return value;
     }
 }
