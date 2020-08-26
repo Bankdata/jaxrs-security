@@ -1,8 +1,8 @@
 package dk.bankdata.api.jaxrs.headers;
 
-import dk.bankdata.api.jaxrs.utils.EnvironmentReader;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -20,16 +20,16 @@ public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRe
     private ContainerRequestContext containerRequestContext;
 
     private static final Logger LOG = LoggerFactory.getLogger(HeaderPropagationFilter.class);
-    private final List<String> headers;
+    private List<String> headers;
 
-    public HeaderPropagationFilter() {
-        String envHeaders = EnvironmentReader.loadSystemEnvironmentVariable("HEADER_FORWARDING");
+    @PostConstruct
+    protected void initialize() {
+        String envHeaders = loadSystemEnvironmentVariable("HEADER_FORWARDING");
         headers = Arrays.asList(envHeaders.split(","));
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-
         headers.forEach(header -> {
             String headerValue = requestContext.getHeaderString(header);
 
@@ -51,5 +51,15 @@ public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRe
                 requestContext.getHeaders().putSingle(header, headerValue);
             }
         });
+    }
+
+    protected String loadSystemEnvironmentVariable(String variableName) {
+        String value = System.getenv(variableName);
+
+        if (value == null || value.isEmpty()) {
+            throw new RuntimeException("Expected environment variable: " + variableName);
+        }
+
+        return value;
     }
 }
