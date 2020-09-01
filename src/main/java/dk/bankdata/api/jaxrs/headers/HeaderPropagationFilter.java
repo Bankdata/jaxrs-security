@@ -13,6 +13,7 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@HeaderPropagation
 @Provider
 @ApplicationScoped
 public class HeaderPropagationFilter implements ContainerRequestFilter, ClientRequestFilter {
