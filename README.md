@@ -169,50 +169,6 @@ public class Api {
     }
 }
 ```
-
-##### Header forwarding (Header Propagation)
-This is an easy why to forward headers in the request to any client requests executed.
-This is a @Provider and thus need to be added to the application.
-
-NOTE: This filter requires an environment variable to be set called HEADER_FORWARDING.
-The value should be a list of headers seperated by a , 
-example 'someHeader,SomeOtherHeader'
-
-```java
-public class RestApplication extends Application {
-    @Override
-    public Set<Class<?>> getClasses() {
-        Set<Class<?>> providers = new HashSet<>(super.getClasses());
-        
-        providers.add(HeaderPropagationFilter.class);
-
-        return providers;
-    }
-}
-```
-
-The client instance also need to register this filter like this
-
-```java
-@ApplicationScoped
-public class ClientProducer {
-    @Produces    
-    public Client produceClient(JwtClientFilter jwtClientFilter, HeaderPropagationFilter headerPropagationFilter) {
-        ObjectMapper objectMapper = createObjectMapper();
- 
-        return ClientBuilder.newBuilder()
-                .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-                .register(new JacksonJsonProvider(objectMapper))
-                .register(jwtClientFilter)
-                .register(new JaxrsClientFilter())
-                .register(new CorrelationIdFilter())
-                .register(headerPropagationFilter)
-                .build();
-    }
-}    
-```
-
 ##### Correlation ID propagation
 
 This will add the two correlation ID headers (Client-generated and server-generated) into MDC as `clientCorrelationId` and  `correlationId` respectively and also propagate them into HTTP client calls.
@@ -268,4 +224,52 @@ To output the Correlation IDs into your logs, you need to setup your logging con
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
+```
+
+##### Header propagation
+
+This will enable header forwarding on the annotated endpoints.
+As this is a @Provider it has to be added to your application 
+
+```
+public class RestApplication extends Application {
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> providers = new HashSet<>(super.getClasses());
+        
+        providers.add(HeaderPropagation.class);
+
+        return providers;
+    }
+}
+```
+To enable this on all apis at once just annotate the class itself like this
+
+```java 
+@ApplicationScoped
+@HeaderPropagation
+@Path("/data")
+public class Api {
+    @GET
+    @Consumes({MediaType.APPLICATION_JSON, "application/vnd.data-v1+json"})
+    @Produces({MediaType.APPLICATION_JSON, "application/vnd.data-v1+json"})
+    public Response getData() {
+        // endpoint logic        
+        return Response.ok().type("application/vnd.data-v1+json").entity(data).build();
+    }
+}
+```
+Lastly the Client object needs to be enriched with the headerpropagation class like this
+```java
+@ApplicationScoped
+public class ClientProducer {
+
+    @Produces
+    public Client produceClient(JwtClientFilter jwtClientFilter, HeaderPropagationFilter headerPropagationFilter) {
+ 
+        return ClientBuilder.newBuilder()
+                .register(headerPropagationFilter)
+                .build();
+    }
+}
 ```
