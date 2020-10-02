@@ -17,7 +17,7 @@ https://search.maven.org/artifact/dk.bankdata.jaxrs/security
 
 ### Prerequisites
 
-This library needs java 1.8 to function correctly
+This library needs Java 8 or higher to function correctly
 
 [Download here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
@@ -229,6 +229,9 @@ To output the Correlation IDs into your logs, you need to setup your logging con
 ##### Header propagation
 
 This will enable header forwarding on the annotated endpoints.
+
+The headers that should be forwarded should be set in the environment variable HEADER_FORWARDING as a comma-separated list, e.g. `header-1-name,header2-name`
+
 As this is a @Provider it has to be added to your application 
 
 ```
@@ -273,3 +276,5 @@ public class ClientProducer {
     }
 }
 ```
+
+ The library will output a warning to console for each header that was not set.
